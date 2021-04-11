@@ -7,12 +7,12 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import monix.execution.Scheduler.Implicits.global
 
 object Server {
-  def stream[F[_]: ConcurrentEffect: Timer]: Stream[F, ExitCode] = {
+  def stream[Task[_]: ConcurrentEffect: Timer]: Stream[Task, ExitCode] = {
     for {
-      client <- BlazeClientBuilder[F](global).stream
+      client <- BlazeClientBuilder[Task](global).stream
       testClient = new TestClient(client, Uri(path = "https://www.gutenberg.org"))
-      routes = new TestApi[F](testClient).routes.orNotFound
-      exitCode <- BlazeServerBuilder[F](global)
+      routes = new TestApi[Task](testClient).routes.orNotFound
+      exitCode <- BlazeServerBuilder[Task](global)
         .bindHttp(8080, "0.0.0.0")
         .withHttpApp(routes)
         .serve
