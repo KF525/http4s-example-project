@@ -5,11 +5,12 @@ import org.http4s.circe.{jsonOf, _}
 import org.http4s.client.Client
 import org.http4s.{EntityDecoder, EntityEncoder, Uri}
 import cats.implicits._
+import monix.eval.Task
 
-class TestClient[Task[_]: Sync : Monad](client: Client[Task], apiUrl: Uri) {
+class TestClient(client: Client[Task], apiUrl: Uri) {
 
-//  implicit def entityDecoder[String](implicit decoder: Decoder[String]): EntityDecoder[F, String] = jsonOf[F, String]
-//  implicit def entityEncoder[String](implicit encoder: Encoder[String]): EntityEncoder[F, String] = jsonEncoderOf[F, String]
+//  implicit def entityDecoder[String](implicit decoder: Decoder[String]): EntityDecoder[Task, String] = jsonOf[Task, String]
+//  implicit def entityEncoder[String](implicit encoder: Encoder[String]): EntityEncoder[Task, String] = jsonEncoderOf[Task, String]
 
   def getSomething(id: String): Task[String] = {
     println(id)
@@ -20,6 +21,6 @@ class TestClient[Task[_]: Sync : Monad](client: Client[Task], apiUrl: Uri) {
     x.map(t => {
       println(t); t}
     )
-    // Sync[F].delay("hi")
+    //Sync[Task].delay("hi")
   }
 }

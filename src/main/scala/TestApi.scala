@@ -1,9 +1,11 @@
 import cats.effect.Sync
 import org.http4s.{HttpRoutes, Response}
 import org.http4s.dsl.Http4sDsl
-import cats.syntax.functor._, cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.flatMap._
+import monix.eval.Task
 
-class TestApi[Task[_]: Sync](client: TestClient[Task]) {
+class TestApi(client: TestClient) {
   val dsl: Http4sDsl[Task] = new Http4sDsl[Task] {}
   import dsl._
 

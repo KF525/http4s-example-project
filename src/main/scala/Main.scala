@@ -9,7 +9,7 @@ object Main extends IOApp {
     implicit val taskOptions: Task.Options = Task.defaultOptions
     implicit val monixEffect: CatsConcurrentEffectForTask = new CatsConcurrentEffectForTask()
 
-    Server.stream[Task].compile.drain.as(ExitCode.Success).to[IO]
+    Server.stream.compile.drain.as(ExitCode.Success).to[IO]
   }
 }
 
