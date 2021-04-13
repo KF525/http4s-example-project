@@ -1,7 +1,6 @@
-import cats.effect.{ConcurrentEffect, ExitCode, Resource, Timer}
+import cats.effect.{ConcurrentEffect, ExitCode, Timer}
 import cats.implicits.catsSyntaxApplicativeId
 import fs2.Stream
-import monix.eval.Task
 import org.http4s.Uri
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
@@ -13,10 +12,9 @@ object Server {
   def stream[F[_]: ConcurrentEffect: Timer]: Stream[F, ExitCode] = {
     for {
       client: Client[F] <- BlazeClientBuilder[F](global).stream
-      testClient <- Stream.eval(new TestClient(client, Uri(path = "https://www.gutenberg.org")).pure[F])
+      testClient <- Stream.eval(new TestClient(client,
+        Uri.unsafeFromString("https://api.covidtracking.com/v1/")).pure[F])
       routes <- Stream.eval(new TestApi[F](testClient).routes.orNotFound.pure[F])
-      //test <- testClient.getSomething("123")
-      //_ = println(test)
       exitCode <- BlazeServerBuilder[F](global)
         .bindHttp(8080, "0.0.0.0")
         .withHttpApp(routes)
@@ -24,3 +22,8 @@ object Server {
     } yield exitCode
   }
 }
+
+/*
+stream: Returns the backend as a single-element stream. The stream does not emit until the backend is ready to process requests. The backend is shut down when the stream is finalized.
+Stream.eval: Creates a single element stream that gets its value by evaluating the supplied effect. If the effect fails, the returned stream fails.
+ */
