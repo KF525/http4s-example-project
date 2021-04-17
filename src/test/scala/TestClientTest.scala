@@ -7,6 +7,7 @@ import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
+import org.http4s.circe.jsonEncoderOf
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import org.http4s.headers.{Accept, MediaRangeAndQValue}
@@ -14,11 +15,15 @@ import org.http4s.headers.{Accept, MediaRangeAndQValue}
 class TestClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Task] {
 
   "TestClient" should "GET from path" in {
+    implicit val encoder: EntityEncoder[Task, CovidState] = jsonEncoderOf
+
+    val covidState = CovidState("WA", 12345)
     val baseUri = Uri.unsafeFromString("https://www.baseuri.com")
-    val (request, _) = futureValue(withResponse(Ok()){client => new TestClient[Task](client, baseUri).getSomething("ca") })
+    val (request, _) = futureValue(withResponse(Ok(covidState)){ client =>
+      new TestClient[Task](client, baseUri).getSomething("ca") })
 
     request.method should be(Method.GET)
-    request.headers.get(Accept) should be(Some(Accept(MediaRangeAndQValue(MediaRange.`text/*`))))
+    request.headers.get(Accept) should be(Some(Accept(MediaRangeAndQValue(MediaType.application.json))))
     request.uri should be(Uri.unsafeFromString(s"$baseUri/states/ca/current.json"))
   }
 
