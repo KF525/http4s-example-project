@@ -19,12 +19,13 @@ class TestClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Tas
 
     val covidState = CovidState("WA", 12345)
     val baseUri = Uri.unsafeFromString("https://www.baseuri.com")
-    val (request, _) = futureValue(withResponse(Ok(covidState)){ client =>
+    val (request, response) = futureValue(withResponse(Ok(covidState)){ client =>
       new TestClient[Task](client, baseUri).getSomething("ca") })
 
     request.method should be(Method.GET)
     request.headers.get(Accept) should be(Some(Accept(MediaRangeAndQValue(MediaType.application.json))))
     request.uri should be(Uri.unsafeFromString(s"$baseUri/states/ca/current.json"))
+    response should be(covidState)
   }
 
   private def futureValue[A](request: Task[(Request[Task], A)]): (Request[Task], A) =

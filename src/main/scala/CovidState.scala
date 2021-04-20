@@ -1,6 +1,5 @@
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
-import org.http4s.EntityDecoder
 
 case class CovidState(state: String, hospitalizedCurrently: Int)
 
