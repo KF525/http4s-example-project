@@ -1,31 +1,44 @@
+package client
+
+import model.Poem
 import monix.catnap.MVar
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.http4s.client.Client
 import org.http4s.dsl.Http4sDsl
+import org.http4s.headers.{Accept, MediaRangeAndQValue}
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
-import org.http4s._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 import org.http4s.circe.jsonEncoderOf
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import org.http4s.headers.{Accept, MediaRangeAndQValue}
+import org.http4s._
+import org.http4s.circe._
+import io.circe.syntax._
 
-class TestClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Task] {
+class PoemClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Task] {
 
-  "TestClient" should "GET from path" in {
-    implicit val encoder: EntityEncoder[Task, CovidState] = jsonEncoderOf
+  "PoemClient" should "retrieve a random poem" in {
+    implicit val encoder: EntityEncoder[Task, List[Poem]] = jsonEncoderOf[Task, List[Poem]]
 
-    val covidState = CovidState("WA", 12345)
+    val poem = List(Poem(
+      "Emily Dickinson",
+      "I hide myself within my flower,",
+      List("I hide myself within my flower,",
+        "That fading from your Vase,",
+        "You, unsuspecting, feel for me --",
+        "Almost a loneliness."),
+      4
+    ))
     val baseUri = Uri.unsafeFromString("https://www.baseuri.com")
-    val (request, response) = futureValue(withResponse(Ok(covidState)){ client =>
-      new TestClient[Task](client, baseUri).getSomething("ca") })
+    val (request, response) = futureValue(withResponse(Ok(poem)){ client =>
+      new PoemClient[Task](client, baseUri).getRandomPoem })
 
     request.method should be(Method.GET)
     request.headers.get(Accept) should be(Some(Accept(MediaRangeAndQValue(MediaType.application.json))))
-    request.uri should be(Uri.unsafeFromString(s"$baseUri/states/ca/current.json"))
-    response should be(covidState)
+    request.uri should be(Uri.unsafeFromString(s"$baseUri/random/1"))
+    response should be(poem)
   }
 
   private def futureValue[A](request: Task[(Request[Task], A)]): (Request[Task], A) =
