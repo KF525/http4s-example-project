@@ -5,16 +5,21 @@ version := "0.1"
 scalaVersion := "2.13.5"
 
 lazy val doobieVersion = "0.12.1"
+lazy val http4sVersion = "0.21.20"
+lazy val circeVersion = "0.13.0"
+lazy val monixVersion = "3.3.0"
 
 libraryDependencies ++= Seq(
-  "org.http4s"             %% "http4s-dsl"              % "0.21.20",
-  "org.http4s"             %% "http4s-blaze-server"     % "0.21.20",
-  "org.http4s"             %% "http4s-blaze-client"     % "0.21.20",
-  "org.http4s"             %% "http4s-circe"            % "0.21.20",
-  "io.circe"               %% "circe-generic"           % "0.13.0",
-  "io.circe"               %% "circe-parser"            % "0.13.0",
-  "io.monix"               %% "monix-catnap"            % "3.3.0",
-  "io.monix"               %% "monix"                   % "3.3.0",
+  "io.circe"               %% "circe-generic"           % circeVersion,
+  "io.circe"               %% "circe-parser"            % circeVersion,
+  "org.http4s"             %% "http4s-dsl"              % http4sVersion,
+  "org.http4s"             %% "http4s-blaze-server"     % http4sVersion,
+  "org.http4s"             %% "http4s-blaze-client"     % http4sVersion,
+  "org.http4s"             %% "http4s-circe"            % http4sVersion,
+  "io.monix"               %% "monix-catnap"            % monixVersion,
+  "io.monix"               %% "monix"                   % monixVersion,
+  "com.github.pureconfig"  %% "pureconfig"              % "0.15.0",
+  "com.github.pureconfig" %% "pureconfig-http4s" % "0.15.0",
   "org.tpolecat"           %% "doobie-core"             % doobieVersion,
   "org.tpolecat"           %% "doobie-postgres"         % doobieVersion,
   "org.scalactic"          %% "scalactic"               % "3.2.7",

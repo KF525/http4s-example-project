@@ -1,10 +1,14 @@
-package postgres
+package db
 
 import cats.effect.{Async, ContextShift, IO}
+import config.DatabaseConfig
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
+import pureconfig.ConfigSource
+import pureconfig.generic.auto.exportReader
+import pureconfig.loadConfig
 
-class Transaction[F[_]: Async : ContextShift] {
+class Transaction[F[_]: Async : ContextShift](config: DatabaseConfig) {
 
   // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
   // is where nonblocking operations will be executed. For testing here we're using a synchronous EC.
@@ -15,10 +19,10 @@ class Transaction[F[_]: Async : ContextShift] {
   /**
    * A Transactor is a data type that knows how to connect to a database, hand out connections, and clean them up; and with this knowledge it can transform ConnectionIO ~> IO, which gives us a program we can run. Specifically it gives us an IO that, when run, will connect to the database and execute single transaction.
    */
-  val mxa: Transactor[F] = Transactor.fromDriverManager[F](
-    "org.postgresql.Driver",
-    "jdbc:postgresql:test_db",
-    "root",
-    "unicorn"
+  def mxa: Transactor[F] = Transactor.fromDriverManager[F](
+    config.driver,
+    config.url,
+    config.username,
+    config.password
   )
 }

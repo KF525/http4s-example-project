@@ -1,26 +1,41 @@
-import cats.effect.{ConcurrentEffect, ContextShift, ExitCode, Timer}
+import cats.effect.{ConcurrentEffect, ContextShift, ExitCode, Sync, Timer}
 import cats.implicits.catsSyntaxApplicativeId
 import client.PoemClient
+import config.{DatabaseConfig, ServerConfig}
+import db.Transaction
 import fs2.Stream
+import http.CompoundPoemApi
 import org.http4s.Uri
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.http4s.server.blaze.BlazeServerBuilder
 import monix.execution.Scheduler.Implicits.global
-import postgres.Transaction
+import repository.CompoundPoemRepository
+import pureconfig.ConfigSource
+import pureconfig.generic.auto.exportReader
 
 object Server {
+
+  def getDatabase[F[_]: Sync : ConcurrentEffect : Timer : ContextShift]: Stream[F, Transaction[F]] = for {
+    databaseConfig <- Stream.eval(ConfigSource.default.loadOrThrow[DatabaseConfig].pure[F])
+    dbConnection <- Stream.eval(new Transaction[F](databaseConfig).pure[F])
+  } yield dbConnection
+
+  def getClient[F[_]: Sync : ConcurrentEffect]: Stream[F, PoemClient[F]] = for {
+    client <- BlazeClientBuilder[F](global).stream
+    poemClient <- Stream.eval(new PoemClient(client,
+      Uri.unsafeFromString("https://poetrydb.org/")).pure[F])
+  } yield poemClient
+
   def stream[F[_] : ConcurrentEffect : Timer : ContextShift]: Stream[F, ExitCode] = {
     for {
-      client <- BlazeClientBuilder[F](global).stream //Client[F] <- Stream[F, Client[F]]
-      dbConnection: Transaction[F] = new Transaction[F]
-      testClient <- Stream.eval(new PoemClient(client,
-        Uri.unsafeFromString("https://poetrydb.org/")).pure[F]) //client.TestClient[F] <- Stream[F, client.TestClient[F]]
-      routes <- Stream.eval(new TestApi[F](testClient, dbConnection).routes.orNotFound.pure[F]) // Kleisli[F, Request[F], Response[F] <- Stream[F, Kleisli[F, Request[F], Response[F]]]
-      exitCode <- BlazeServerBuilder[F](global)
-        .bindHttp(8080, "0.0.0.0")
-        .withHttpApp(routes)
-        .serve
+      poemClient <- getClient
+      database <- getDatabase
+      serverConfig <- Stream.eval(ConfigSource.default.loadOrThrow[ServerConfig].pure[F])
+      poemRepository <- Stream.eval(new CompoundPoemRepository[F](database).pure[F])
+      routes <- Stream.eval(new CompoundPoemApi[F](poemClient, poemRepository).routes.orNotFound.pure[F])
+      exitCode <- BlazeServerBuilder[F](global).bindHttp(
+        serverConfig.port, serverConfig.host).withHttpApp(routes).serve
     } yield exitCode
   }
 }

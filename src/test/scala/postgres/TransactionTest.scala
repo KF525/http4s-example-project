@@ -1,29 +1,24 @@
 package postgres
 
 import cats.implicits.catsSyntaxTuple2Semigroupal
+import config.DatabaseConfig
 import doobie.free.connection.ConnectionIO
 import doobie.implicits.{toSqlInterpolator, _}
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import doobie._
-import doobie.implicits._
-import doobie.util.ExecutionContexts
-import cats._
-import cats.data._
-import cats.effect._
-import cats.implicits._
-import fs2.Stream
+import db.Transaction
+
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import doobie.implicits._
-import doobie._
 
 
 //Connection pool**
 class TransactionTest extends AnyFlatSpec with should.Matchers {
-  val transactor = new Transaction[Task]
+  val databaseConfig = DatabaseConfig("org.postgresql.Driver", "jdbc:postgresql:test_db", "root", "unicorn")
+  val transactor = new Transaction[Task](databaseConfig)
 
   "doobie" should "work" in {
     val program3: ConnectionIO[(Int, Double)] =

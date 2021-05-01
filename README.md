@@ -1,20 +1,21 @@
 
-About Application:
+###About Application:
 
 
-Running Application:
-App environment is defined with Dockerfile. Services that make up app are defined in docker-compose.yml so they can be run together in an isolated environment. Run ```docker compose up -d``` and the Docker compose command starts and runs your entire app. Image is a template for the environment that I want to run and when you run an image you get a container. Each container should contain a single process/provide a single service that are able to talk to each other.
-docker-compose lets us define all of our services in a single configuration file.
+###Running Application:
+The app environment is defined within its Dockerfile. The services that make up the app are defined in the docker-compose.yml file which enable them to be run together in an isolated environment.  An image is a template for the desired environment and generatesa container when run. Each container should contain a single process or service. Docker-compose lets us define all 
+of our services in a single configuration file, and how those services are able to talk to one another. 
+Start the application with `docker-compose up -d` and stop the application with `docker-compose down`. 
 
+-----
+This application makes use of:
 
+- *Http4s*: 
 
-Http4s: 
+- *Circe*: Library that handles Json input/output. Supports automatic generation of encoders and decoders (including case classes with normal types). 
 
-Circe: Library that handles Json input/output. Supports automatic generation of encoders and decoders (including normal case classes with normal types). 
+- *Doobie*: Pure functional JDBC layer. Not an ORM.Actual write SQL queries. Ability to map query to scala types.
 
-Doobie: Pure functional JDBC layer. Not an ORM.Actual write SQL queries. Ability to map query to scala types.
+- *Cats Effect*: Cats IO Monad: Define side effect, but we execute it at the latest stage -- push side effects to border of our program. Because the Cats IO is a Monad, we can compose effects. 
 
-Cats Effect: 
-Cats IO Monad: Define side effect, but we execute it at the latest stage -- push side effects to border of our program. Because the Cats IO is a Monad, we can compose effects. 
-
-Doobie
+- *PureConfig:*

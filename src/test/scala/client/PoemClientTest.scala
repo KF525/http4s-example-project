@@ -14,8 +14,6 @@ import org.http4s.circe.jsonEncoderOf
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import org.http4s._
-import org.http4s.circe._
-import io.circe.syntax._
 
 class PoemClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Task] {
 
@@ -33,7 +31,7 @@ class PoemClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Tas
     ))
     val baseUri = Uri.unsafeFromString("https://www.baseuri.com")
     val (request, response) = futureValue(withResponse(Ok(poem)){ client =>
-      new PoemClient[Task](client, baseUri).getRandomPoem })
+      new PoemClient[Task](client, baseUri).getPoem })
 
     request.method should be(Method.GET)
     request.headers.get(Accept) should be(Some(Accept(MediaRangeAndQValue(MediaType.application.json))))
