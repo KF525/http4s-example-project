@@ -1,21 +1,43 @@
 package repository
 
-import cats.effect.Sync
+import java.sql.SQLException
+
+import cats.effect.{Async, ConcurrentEffect, ContextShift, IO, Sync, Timer}
 import db.Transaction
 import doobie.implicits.toSqlInterpolator
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
+import doobie.util.ExecutionContexts
+import doobie.util.transactor.Transactor
+import config.DatabaseConfig
+import doobie.util.ExecutionContexts
+import doobie.util.transactor.Transactor
+import monix.execution.Scheduler.Implicits.global
+import monix.eval.Task
+import pureconfig.ConfigSource
+import pureconfig.generic.auto.exportReader
+import pureconfig.loadConfig
 
-class CompoundPoemRepository[F[_]: Sync](database: Transaction[F]) {
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
+import io.circe.generic.semiauto._
+import org.http4s.circe._
 
-  def test: F[(Int, Double)] = {
-    val program3: ConnectionIO[(Int, Double)] =
+class CompoundPoemRepository[F[_]: Sync: ConcurrentEffect : Timer : ContextShift](database: Transaction[F]) {
+
+  def test: F[Either[SQLException, Int]] = {
+    println(database)
+    val program3: ConnectionIO[Int] =
       for {
         a <- sql"select 42".query[Int].unique
-        b <- sql"select random()".query[Double].unique
-      } yield (a, b)
+        //b <- sql"select random()".query[Double].unique
+      } yield a //(a, b)
 
-    program3.transact(database.mxa)
+    println("About to execute!")
+    val x = program3.transact(database.mxa).attemptSql
+    println("Finished inside test!!!!")
+    println(x)
+    x
   }
 
   def savePoem = ???

@@ -14,8 +14,6 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import doobie.implicits._
 
-
-//Connection pool**
 class TransactionTest extends AnyFlatSpec with should.Matchers {
   val databaseConfig = DatabaseConfig("org.postgresql.Driver", "jdbc:postgresql:test_db", "root", "unicorn")
   val transactor = new Transaction[Task](databaseConfig)
@@ -27,10 +25,9 @@ class TransactionTest extends AnyFlatSpec with should.Matchers {
         b <- sql"select random()".query[Double].unique
       } yield (a, b)
 
-    println(transactor.mxa)
     val x: Task[(Int, Double)] = program3.transact(transactor.mxa)
     val y: (Int, Double) = Await.result(x.runToFuture, 5.seconds)
-    println(y)
+    println(y) //This worked
   }
 
   it should "drop and create a table" in {
@@ -49,16 +46,16 @@ class TransactionTest extends AnyFlatSpec with should.Matchers {
 
     val x = (drop, create).mapN(_ + _).transact(transactor.mxa)
     val y = Await.result(x.runToFuture, 5.seconds)
-    println(y)
+    println(y) //This should be 1
   }
 
   it should "insert into and retrieve from a table" in {
     val insert = sql"""INSERT INTO test_table_two VALUES ('kate', 39);""".update.run
     println("HERE I AM!!!!!!!")
     println(transactor.mxa)
-//    val  x = insert.transact(transactor.mxa)
-//    val y = Await.result(x.runToFuture, 5.seconds)
-//    println(y)
+    val  x = insert.transact(transactor.mxa)
+    val y = Await.result(x.runToFuture, 5.seconds)
+    println(y)
 
     case class Person(name: String, age: Int)
     val get = sql"""SELECT * FROM test_table_two limit 1;""".query[Person]

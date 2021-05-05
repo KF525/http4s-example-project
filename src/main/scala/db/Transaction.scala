@@ -1,12 +1,16 @@
 package db
 
-import cats.effect.{Async, ContextShift, IO}
+import cats.effect.{Async, Blocker, ContextShift, IO, Resource}
+import com.zaxxer.hikari.HikariConfig
 import config.DatabaseConfig
+import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig
+
+import scala.concurrent.duration.DurationInt
 
 class Transaction[F[_]: Async : ContextShift](config: DatabaseConfig) {
 
@@ -25,4 +29,31 @@ class Transaction[F[_]: Async : ContextShift](config: DatabaseConfig) {
     config.username,
     config.password
   )
+
+  //To replace the current transactor---
+  def createTransactor(databaseConfig: DatabaseConfig): Resource[F, HikariTransactor[F]] = {
+    // Resource yielding a transactor configured with a bounded connect EC and an unbounded
+    // transaction EC. Everything will be closed and shut down cleanly after use.
+    val hikariConfig = new HikariConfig()
+    hikariConfig.setDriverClassName("org.postgresql.Driver")
+    hikariConfig.setJdbcUrl(databaseConfig.url)
+    hikariConfig.setUsername(databaseConfig.username)
+    hikariConfig.setPassword(databaseConfig.password)
+    hikariConfig.setMaxLifetime(345.seconds.toMillis)
+    hikariConfig.setMaximumPoolSize(databaseConfig.maximumPoolSize)
+    hikariConfig.setMinimumIdle(databaseConfig.minimumIdle)
+
+    val transactor: Resource[F, HikariTransactor[F]] = {
+      for {
+        ce <- ExecutionContexts.fixedThreadPool[F](databaseConfig.threadPoolSize) // our connect EC
+        be <- ExecutionContexts.cachedThreadPool[F] // our blocking EC
+        xa <- HikariTransactor.fromHikariConfig[F](
+          hikariConfig,
+          connectEC = ce, // await connection here
+          Blocker.liftExecutionContext(be) // execute JDBC operations here
+        )
+      } yield xa
+    }
+    transactor
+  }
 }

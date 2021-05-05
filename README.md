@@ -19,3 +19,13 @@ This application makes use of:
 - *Cats Effect*: Cats IO Monad: Define side effect, but we execute it at the latest stage -- push side effects to border of our program. Because the Cats IO is a Monad, we can compose effects. 
 
 - *PureConfig:*
+
+
+TODO:
+- Think through models/tables
+- Working compound poem creation
+- User creation
+- Authentication
+- Make your compound poems private
+- Tests
+ 
