@@ -7,6 +7,6 @@ case class DatabaseConfig(driver: String,
                           url: String,
                           username: String,
                           password: String,
-                          maximumPoolSize: 10,
-                          minimumIdle: 3,
-                          threadPoolSize: 5)
+                          maximumPoolSize: Int,
+                          minimumIdle: Int,
+                          threadPoolSize: Int)

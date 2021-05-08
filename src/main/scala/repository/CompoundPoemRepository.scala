@@ -23,7 +23,7 @@ import scala.concurrent.duration.DurationInt
 import io.circe.generic.semiauto._
 import org.http4s.circe._
 
-class CompoundPoemRepository[F[_]: Sync: ConcurrentEffect : Timer : ContextShift](database: Transaction[F]) {
+class CompoundPoemRepository[F[_]: Sync: ConcurrentEffect : Timer : ContextShift](database: Transactor[F]) {
 
   def test: F[Either[SQLException, Int]] = {
     println(database)
@@ -31,10 +31,10 @@ class CompoundPoemRepository[F[_]: Sync: ConcurrentEffect : Timer : ContextShift
       for {
         a <- sql"select 42".query[Int].unique
         //b <- sql"select random()".query[Double].unique
-      } yield a //(a, b)
+      } yield a
 
     println("About to execute!")
-    val x = program3.transact(database.mxa).attemptSql
+    val x = program3.transact(database).attemptSql
     println("Finished inside test!!!!")
     println(x)
     x

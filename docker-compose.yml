@@ -2,6 +2,7 @@ version: '3.9'
 services:
   db:
     image: library/postgres:11.11
+    container_name: compound_poem_database
     ports:
       - 5432:5432
     volumes: # here is where you could persist data even if container shuts down
@@ -12,6 +13,7 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
   api:
     build: .
+    container_name: compound_poem_application
     ports:
       - 8027:8080
     volumes:

@@ -13,16 +13,16 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{DAYS, DurationInt}
 
 class CompoundPoemRepositoryTest extends AnyFlatSpec with should.Matchers{
-  val databaseConfig = DatabaseConfig("org.postgresql.Driver", "jdbc:postgresql:test_db", "root", "unicorn")
-  val transactor = new Transaction[Task](databaseConfig)
-  val repository = new CompoundPoemRepository[Task](transactor)
-
-  "poemRepository" should "work" in {
-    val x: Task[Either[SQLException, Int]] = repository.test
-    val y = Await.result(x.runToFuture, 5.seconds)
-    println(y)
-    //y._1 shouldBe 42
-  }
+//  val databaseConfig = DatabaseConfig("org.postgresql.Driver", "jdbc:postgresql:test_db", "root", "unicorn", 10, 3, 5)
+//  val transactor = new Transaction[Task](databaseConfig).createTransactor
+//  val repository = new CompoundPoemRepository[Task](transactor)
+//
+//  "poemRepository" should "work" in {
+//    val x: Task[Either[SQLException, Int]] = repository.test
+//    val y = Await.result(x.runToFuture, 5.seconds)
+//    println(y)
+//    //y._1 shouldBe 42
+//  }
 
 //  it should "drop and create a table" in {
 //    val drop =

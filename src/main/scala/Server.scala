@@ -1,50 +1,65 @@
-import cats.effect.{ConcurrentEffect, ContextShift, ExitCode, Sync, Timer}
-import cats.implicits.catsSyntaxApplicativeId
+import cats.{Applicative, Monad}
+import cats.effect.{ConcurrentEffect, ContextShift, Resource, Sync, Timer}
 import client.PoemClient
-import config.{DatabaseConfig, ServerConfig}
+import config.{DatabaseConfig, ServiceConfig}
 import db.Transaction
-import fs2.Stream
-import http.CompoundPoemApi
-import org.http4s.Uri
-import org.http4s.client.blaze.BlazeClientBuilder
-import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
-import org.http4s.server.blaze.BlazeServerBuilder
+import doobie.Transactor
+import http.{CompoundPoemApi, PoemApi}
+import org.http4s.{HttpRoutes, Uri}
 import monix.execution.Scheduler.Implicits.global
 import repository.CompoundPoemRepository
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
+import pureconfig.{ConfigReader, loadConfig}
+import org.http4s.client.blaze.BlazeClientBuilder
+import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.server._
+import cats.implicits._
+import org.http4s.implicits._
+import scala.concurrent.duration.DurationInt
 
 object Server {
 
-  def getDatabase[F[_]: Sync : ConcurrentEffect : Timer : ContextShift]: Stream[F, Transaction[F]] = for {
-    databaseConfig <- Stream.eval(ConfigSource.default.loadOrThrow[DatabaseConfig].pure[F])
-    dbConnection <- Stream.eval(new Transaction[F](databaseConfig).pure[F])
-  } yield dbConnection
+  def stream[F[_] : ConcurrentEffect : Timer : ContextShift : Sync : Applicative]: Resource[F, Server[F]] = {
+    val serviceConfig: ServiceConfig = ConfigSource.default.loadOrThrow[ServiceConfig]
+    val databaseConfig: DatabaseConfig = ConfigSource.default.loadOrThrow[DatabaseConfig]
 
-  def getClient[F[_]: Sync : ConcurrentEffect]: Stream[F, PoemClient[F]] = for {
-    client <- BlazeClientBuilder[F](global).stream
-    poemClient <- Stream.eval(new PoemClient(client,
-      Uri.unsafeFromString("https://poetrydb.org/")).pure[F])
-  } yield poemClient
-
-  def stream[F[_] : ConcurrentEffect : Timer : ContextShift]: Stream[F, ExitCode] = {
     for {
-      poemClient <- getClient
-      database <- getDatabase
-      serverConfig <- Stream.eval(ConfigSource.default.loadOrThrow[ServerConfig].pure[F])
-      poemRepository <- Stream.eval(new CompoundPoemRepository[F](database).pure[F])
-      routes <- Stream.eval(new CompoundPoemApi[F](poemClient, poemRepository).routes.orNotFound.pure[F])
-      exitCode <- BlazeServerBuilder[F](global).bindHttp(
-        serverConfig.port, serverConfig.host).withHttpApp(routes).serve
-    } yield exitCode
+      client <- BlazeClientBuilder[F](global)
+        .withConnectTimeout(serviceConfig.connectTimeout.seconds)
+        .withRequestTimeout(serviceConfig.requestTimeout.seconds).resource
+      poemClient = new PoemClient[F](client, Uri.unsafeFromString("https://poetrydb.org/"))
+      database <- new Transaction[F](databaseConfig).createTransactor
+      server <- buildService(serviceConfig, poemClient, database)
+    } yield server
+  }
+
+  def buildService[F[_] : ConcurrentEffect : Timer : ContextShift : Monad]
+  (serviceConfig: ServiceConfig, client: PoemClient[F], database: Transactor[F]): Resource[F, Server[F]] =
+    buildServer(serviceConfig, buildRoutes(client, database))
+
+  /**
+   * Returns a kleisli with a Request input and a Response output, such that the response effect is an optional inside the effect of the request and response bodies. HTTP routes can conveniently be constructed from a partial function and combined as a SemigroupK.
+   * Type parameters:
+   * F – the effect type of the Request and Response bodies, and the base monad of the OptionT in which the response is returned.
+   * https://typelevel.org/cats/datatypes/kleisli.html
+   *
+   * The central concept of http4s-dsl is pattern matching. An HttpRoutes[F] is declared as a simple series of case statements. Each case statement attempts to match and optionally extract from an incoming Request[F]. The code associated with the first matching case is used to generate a F[Response[F]].
+   *
+   * Response[F] hasn’t been created yet. We wrapped it in a monadic type [F]. In a real service, generating a Response[F] is likely to be an asynchronous operation with side effects, such as invoking another web service or querying a database, or maybe both. Operating in a F gives us control over the sequencing of operations and lets us reason about our code like good functional programmers. It is the HttpRoutes[F]’s job to describe the task, and the server’s job to run it.
+   */
+  def buildRoutes[F[_] : ConcurrentEffect : Timer : ContextShift]
+  (client: PoemClient[F], database: Transactor[F]): HttpRoutes[F] = {
+    val poemApi: HttpRoutes[F] = new PoemApi[F](client).routes
+    val compoundPoemApi: HttpRoutes[F] = new CompoundPoemApi[F](new CompoundPoemRepository[F](database)).routes
+    poemApi <+> compoundPoemApi
+  }
+
+  def buildServer[F[_] : ConcurrentEffect : Timer : ContextShift]
+  (serviceConfig: ServiceConfig, routes: HttpRoutes[F]): Resource[F, Server[F]] = {
+    val httpApp = Router("/" -> routes).orNotFound
+    BlazeServerBuilder[F](global)
+      .withBanner(List(s"Http4s Server started successfully on port: ${serviceConfig.servicePort}"))
+      .bindHttp(serviceConfig.servicePort, serviceConfig.serviceHost).withHttpApp(httpApp).resource
   }
 }
-
-/*
-https://http4s.org/v0.20/streaming/
-pure[F] => def pure[F[_]](implicit F: Applicative[F]): F[A] = F.pure(a)
-      ie: client.TestClient[F] => F[client.TestClient[F]]; Kleisli[F, Request[F], Response[F]] => F[Kleisli[F, Request[F], Response[F]]]
-stream: Returns the backend as a single-element stream. The stream does not emit until the backend is ready to process requests. The backend is shut down when the stream is finalized.
-Stream.eval: Creates a single element stream that gets its value by evaluating the supplied effect. If the effect fails, the returned stream fails.
-      ie: client.TestClient[F] => Stream[client.TestClient[F]]; F[Kleisli[F, Request[F], Response[F]]] => Stream[F, Kleisli[F, Request[F], Response[F]]]
- */

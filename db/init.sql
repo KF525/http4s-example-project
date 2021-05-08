@@ -1,5 +1,5 @@
 CREATE DATABASE poem_test;
-GRANT ALL PRIVILEGES ON poem_test TO root;
+--GRANT ALL PRIVILEGES ON poem_test TO root;
 
 --CREATE SCHEMA QA; --default is public
 --GRANT ALL ON SCHEMA QA TO root;

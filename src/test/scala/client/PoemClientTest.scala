@@ -1,6 +1,6 @@
 package client
 
-import model.Poem
+import model._
 import monix.catnap.MVar
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
@@ -11,6 +11,7 @@ import org.http4s.implicits.http4sKleisliResponseSyntaxOptionT
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 import org.http4s.circe.jsonEncoderOf
+
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import org.http4s._
