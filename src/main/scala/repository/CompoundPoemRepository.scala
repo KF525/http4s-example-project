@@ -2,26 +2,14 @@ package repository
 
 import java.sql.SQLException
 
-import cats.effect.{Async, ConcurrentEffect, ContextShift, IO, Sync, Timer}
-import db.Transaction
+import cats.effect.{ConcurrentEffect, ContextShift, IO, Sync, Timer}
 import doobie.implicits.toSqlInterpolator
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
-import config.DatabaseConfig
-import doobie.util.ExecutionContexts
-import doobie.util.transactor.Transactor
-import monix.execution.Scheduler.Implicits.global
-import monix.eval.Task
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig
-
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
-import io.circe.generic.semiauto._
-import org.http4s.circe._
 
 class CompoundPoemRepository[F[_]: Sync: ConcurrentEffect : Timer : ContextShift](database: Transactor[F]) {
 
@@ -29,15 +17,9 @@ class CompoundPoemRepository[F[_]: Sync: ConcurrentEffect : Timer : ContextShift
     println(database)
     val program3: ConnectionIO[Int] =
       for {
-        a <- sql"select 42".query[Int].unique
-        //b <- sql"select random()".query[Double].unique
+        a <- sql"select 42, 43".query[Int].unique
       } yield a
-
-    println("About to execute!")
-    val x = program3.transact(database).attemptSql
-    println("Finished inside test!!!!")
-    println(x)
-    x
+    program3.transact(database).attemptSql
   }
 
   def savePoem = ???

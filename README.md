@@ -10,22 +10,27 @@ Start the application with `docker-compose up -d` and stop the application with 
 -----
 This application makes use of:
 
-- *Http4s*: 
+- *Http4s*:
+
+- *Monix*:  
 
 - *Circe*: Library that handles Json input/output. Supports automatic generation of encoders and decoders (including case classes with normal types). 
 
 - *Doobie*: Pure functional JDBC layer. Not an ORM.Actual write SQL queries. Ability to map query to scala types.
 
-- *Cats Effect*: Cats IO Monad: Define side effect, but we execute it at the latest stage -- push side effects to border of our program. Because the Cats IO is a Monad, we can compose effects. 
+- *Cats Effect*: 
 
-- *PureConfig:*
+- *PureConfig:* 
 
+Define side effect, but we execute it at the latest stage -- push side effects to border of our program. Because the Cats IO is a Monad, we can compose effects. 
 
 TODO:
+- Tests
+- readme
 - Think through models/tables
 - Working compound poem creation
 - User creation
 - Authentication
 - Make your compound poems private
-- Tests
+- metrics
  
