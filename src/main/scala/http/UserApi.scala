@@ -33,6 +33,8 @@ class UserApi[F[_] : Sync](userController: UserController[F]) {
 //        response <- Created(user)
 //      } yield response
 
+      val requestAttempt: F[CreateUserRequest] = rawRequest.as[CreateUserRequest]
+      println(requestAttempt)
       val request = CreateUserRequest("testuser@gmail.com", "test", "user")
       val user: F[User] = userController.create(request)
       Created(user)

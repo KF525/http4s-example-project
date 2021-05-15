@@ -16,21 +16,12 @@ class UserStore[F[_]: Sync: ConcurrentEffect : Timer : ContextShift ](transactor
      _ <-  createQuery(user).run
     } yield ()
 
-    println(plan)
-    println(transactor)
     plan.transact(transactor).map(_ => user)
   }
 
   private def createQuery(user: User): Update0 = {
-    println(user)
     val User(first_name, last_name, email) = user
-    val x = sql"""insert into poem_user
-         |(first_name, last_name, email)
-         |values
-         |($first_name, $last_name, $email)
-         |""".update
-    println(x)
-    x
+    sql"insert into poem_user (first_name, last_name, email) values ($first_name, $last_name, $email)".update
   }
 
 }
