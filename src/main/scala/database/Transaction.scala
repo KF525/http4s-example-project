@@ -1,13 +1,15 @@
-package db
+package database
 
-import cats.effect.{Async, Blocker, ContextShift, Resource}
+import cats.effect.{Async, Blocker, ContextShift, Resource, Sync}
 import com.zaxxer.hikari.HikariConfig
 import config.DatabaseConfig
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
+import org.flywaydb.core.Flyway
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig
+
 import scala.concurrent.duration.DurationInt
 
 class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {
@@ -36,4 +38,21 @@ class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {
     }
     transactor
   }
+}
+
+object Transaction {
+
+  def initialize[F[_]: Sync ](transactor: HikariTransactor[F]): F[Unit] = {
+    transactor.configure { dataSource =>
+      Sync[F].delay {
+        println("Inside the sync")
+        val flyWay = Flyway.configure().dataSource(dataSource).load()
+        println("About to migrate!")
+        flyWay.migrate()
+        println("Done migrating!")
+        ()
+      }
+    }
+  }
+
 }

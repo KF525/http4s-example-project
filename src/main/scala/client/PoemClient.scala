@@ -9,7 +9,8 @@ import org.http4s.{EntityDecoder, Method, Request, Uri}
 class PoemClient[F[_]: Sync](client: Client[F], baseUri: Uri) {
 
   /**
-   * The expect submits a request and decodes response on success. Status code returned on failure.
+   * Http4s client expect submits a request and decodes response on success.
+   * Status code returned on failure.
    * Underlying HTTP connection is closed at completion of decoding.
    */
   def getPoem: F[List[Poem]] = {

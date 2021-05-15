@@ -3,7 +3,7 @@ package model
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-case class User(name: String)
+case class User(firstName: String, lastName: String, email: String)
 
 object User {
   implicit val encoder: Encoder.AsObject[User] = deriveEncoder[User]
