@@ -2,19 +2,19 @@ package http
 
 import cats.effect.Sync
 import cats.implicits._
-import client.PoemClient
+import controller.PoemController
 import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 
-class PoemApi[F[_]: Sync](client: PoemClient[F]) {
+class PoemApi[F[_]: Sync](poemController: PoemController[F]) {
   val dsl: Http4sDsl[F] = new Http4sDsl[F] {}
   import dsl._
 
   val routes: HttpRoutes[F] = HttpRoutes.of {
-    case GET -> Root / "poem" => //TODO: Get rid of the list
+    case GET -> Root / "line" =>
       for {
-        poem <- client.getPoem
+        poem <- poemController.getLine
         response <- Ok(poem)
       } yield response
   }

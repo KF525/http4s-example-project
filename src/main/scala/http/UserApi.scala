@@ -1,18 +1,12 @@
 package http
 
-import cats.data.EitherT
-import cats.effect.Sync
 import model.{CreateUserRequest, User}
 import org.http4s.HttpRoutes
 import controller.UserController
-import error.CompoundPoemError.JsonDecodeError
-import org.http4s.dsl.Http4sDsl
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.circe.CirceEntityDecoder.circeEntityDecoder
 import cats.effect.Sync
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
-import cats.implicits._
 
 /**
  * An api is essentially a function from request to response: Api: Request[Task] => Task[Response[Task]] (really it is a partial function because a route is not guaranteed to exist) and a request or response is essentially a stream Response/Request: Stream[Task, Byte] (edited)

@@ -15,7 +15,7 @@ import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server._
 import cats.implicits._
-import controller.UserController
+import controller.{PoemController, UserController}
 import org.http4s.implicits._
 
 import scala.concurrent.duration.DurationInt
@@ -32,8 +32,9 @@ object Server {
         .withRequestTimeout(serviceConfig.requestTimeout.seconds).resource
       poemClient = new PoemClient[F](client, Uri.unsafeFromString("https://poetrydb.org/"))
       database <- new Transaction[F](databaseConfig).createTransactor
-      //_ = Transaction.initialize(database)
+      _ <- Transaction.initialize(database)
       server <- buildService(serviceConfig, poemClient, database)
+      _ = println("Server started...")
     } yield server
   }
 
@@ -53,7 +54,7 @@ object Server {
    */
   def buildRoutes[F[_] : ConcurrentEffect : Timer : ContextShift]
   (client: PoemClient[F], database: Transactor[F]): HttpRoutes[F] = {
-    val poemApi: HttpRoutes[F] = new PoemApi[F](client).routes
+    val poemApi: HttpRoutes[F] = new PoemApi[F](new PoemController[F](client)).routes
     val compoundPoemApi: HttpRoutes[F] = new CompoundPoemApi[F](new CompoundPoemStore[F](database)).routes
     val userApi: HttpRoutes[F] = new UserApi[F](
       new UserController[F](new UserStore[F](database))).routes

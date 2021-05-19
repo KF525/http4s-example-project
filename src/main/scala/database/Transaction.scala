@@ -1,11 +1,15 @@
 package database
 
+import cats.Applicative
 import cats.effect.{Async, Blocker, ContextShift, Resource, Sync}
-import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari._
 import config.DatabaseConfig
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
+import javax.sql.DataSource
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.configuration.FluentConfiguration
+import org.flywaydb.core.api.output.MigrateResult
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig
@@ -38,21 +42,30 @@ class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {
     }
     transactor
   }
+
 }
 
 object Transaction {
-
-  def initialize[F[_]: Sync ](transactor: HikariTransactor[F]): F[Unit] = {
-    transactor.configure { dataSource =>
+  def initialize[F[_] : Sync : Applicative](transactor: HikariTransactor[F]): Resource[F, F[Unit]] = {
+    Resource.eval(
       Sync[F].delay {
-        println("Inside the sync")
-        val flyWay = Flyway.configure().dataSource(dataSource).load()
-        println("About to migrate!")
-        flyWay.migrate()
-        println("Done migrating!")
-        ()
+        transactor.configure {
+          dataSource => {
+            println("DATASOURCE")
+            val a: HikariDataSource = dataSource
+            println(dataSource.getDriverClassName)
+            println(dataSource.getJdbcUrl)
+            val f: FluentConfiguration = Flyway.configure().dataSource(dataSource)
+            val t = f.getDataSource
+            println(t)
+            println(t.getConnection)
+            val x: Flyway = f.load
+            val z: DataSource = x.getConfiguration.getDataSource
+            x.migrate()
+            Sync[F].delay(())
+          }
+        }
       }
-    }
+    )
   }
-
 }

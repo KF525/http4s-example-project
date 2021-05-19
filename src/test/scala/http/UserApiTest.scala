@@ -4,7 +4,6 @@ import cats.effect.Sync
 import controller.UserController
 import model.{CreateUserRequest, User}
 import monix.eval.Task
-import monix.execution.Scheduler
 import org.http4s.client.dsl.Http4sClientDsl
 import org.mockito._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -29,42 +28,18 @@ class UserApiTest extends AnyFlatSpec with MockitoSugar with Matchers with Http4
     implicit val encoder: EntityEncoder[Task, CreateUserRequest] = jsonEncoderOf[Task, CreateUserRequest]
     implicit val decoder: EntityDecoder[Task, User] = jsonOf[Task, User]
 
-    val firstName = "test"
-    val lastName = "user"
-    val email = "testuser@gmail.com"
+    val (firstName, lastName, email) = ("test", "user", "testuser@gmail.com")
     val request = CreateUserRequest(email, firstName, lastName)
     val expectedUser = User(firstName, lastName, email)
 
     Mockito.when(mockController.create(request)).thenReturn(Sync[Task].delay(expectedUser))
 
     val (status, user) = client.expect[User](post(newUserUri, request))
-
     status should be(Status.Created)
     user should be(expectedUser)
   }
 
-//  it should "get" in withMocks { (client, mockController) =>
-//    implicit val encoder: EntityEncoder[Task, CreateUserRequest] = jsonEncoderOf[Task, CreateUserRequest]
-//    implicit val decoder: EntityDecoder[Task, User] = jsonOf[Task, User]
-//
-//    val firstName = "firstName"
-//    val lastName = "lastName"
-//    val email = "firstNameLastName@gmail.com"
-//    val request = CreateUserRequest(email, firstName, lastName)
-//    val expectedUser = User(firstName, lastName, email)
-//
-//    val a = Sync[Task].delay(expectedUser)
-//    Mockito.when(mockController.create(request)).thenReturn(a)
-//
-//    println(newUserUri)
-//    val (status, user) = client.expect[User](get(newUserUri))
-//
-//    status should be(Status.Created)
-//    user should be(expectedUser)
-//  }
-
   private val newUserUri: Uri = Uri.unsafeFromString("/").addPath("user")
-  private def get[A](uri: Uri): Task[Request[Task]] = GET(uri)
   private def post[A](uri: Uri, body: A)(implicit encoder: EntityEncoder[Task, A]): Task[Request[Task]] =
     POST(body, uri) map (_ withEntity body)
 }
