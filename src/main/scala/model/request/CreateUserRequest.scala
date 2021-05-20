@@ -1,4 +1,4 @@
-package model
+package model.request
 
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}

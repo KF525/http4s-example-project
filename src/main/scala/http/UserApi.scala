@@ -1,10 +1,11 @@
 package http
 
-import model.{CreateUserRequest, User}
+import model.User
 import org.http4s.HttpRoutes
 import controller.UserController
 import org.http4s.circe.CirceEntityDecoder.circeEntityDecoder
 import cats.effect.Sync
+import model.request.CreateUserRequest
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 

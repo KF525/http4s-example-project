@@ -1,6 +1,7 @@
 package client
 
 import model._
+import model.reponse.PoemResponse
 import monix.catnap.MVar
 import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
@@ -19,7 +20,7 @@ import org.http4s._
 class PoemClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Task] {
 
   "PoemClient" should "retrieve a random poem" in {
-    implicit val encoder: EntityEncoder[Task, List[Poem]] = jsonEncoderOf[Task, List[Poem]]
+    implicit val encoder: EntityEncoder[Task, List[PoemResponse]] = jsonEncoderOf[Task, List[PoemResponse]]
 
     val poem = List(Poem(
       "Emily Dickinson",

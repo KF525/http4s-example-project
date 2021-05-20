@@ -1,7 +1,8 @@
 package controller
 
 import cats.effect.Sync
-import model.{CreateUserRequest, User}
+import model.User
+import model.request.CreateUserRequest
 import store.UserStore
 
 class UserController[F[_]: Sync](userStore: UserStore[F]) {

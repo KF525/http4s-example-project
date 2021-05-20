@@ -14,8 +14,8 @@ class PoemApi[F[_]: Sync](poemController: PoemController[F]) {
   val routes: HttpRoutes[F] = HttpRoutes.of {
     case GET -> Root / "line" =>
       for {
-        poem <- poemController.getLine
-        response <- Ok(poem)
+        line <- poemController.getLine
+        response <- Ok(line)
       } yield response
   }
 }

@@ -2,7 +2,8 @@ package http
 
 import cats.effect.Sync
 import controller.UserController
-import model.{CreateUserRequest, User}
+import model.User
+import model.request.CreateUserRequest
 import monix.eval.Task
 import org.http4s.client.dsl.Http4sClientDsl
 import org.mockito._
