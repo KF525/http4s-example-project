@@ -13,6 +13,7 @@ class CompoundPoemApi[F[_]: Sync](repository: CompoundPoemStore[F]) {
 
   val routes: HttpRoutes[F] = HttpRoutes.of {
     case GET -> Root / "health" =>  Ok("healthy")
+    case GET -> Root / "compound" / "create" => Ok("this is where I will create a compound poem!")
     case GET -> Root / "doobie" => {
       repository.test.map{ e => e.fold(_ => Ok("fail"), t => Ok(t))}.flatten
     }

@@ -9,7 +9,6 @@ import doobie.util.ExecutionContexts
 import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.configuration.FluentConfiguration
-import org.flywaydb.core.api.output.MigrateResult
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig

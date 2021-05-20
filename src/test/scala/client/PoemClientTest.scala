@@ -22,13 +22,13 @@ class PoemClientTest extends AnyFlatSpec with should.Matchers with Http4sDsl[Tas
   "PoemClient" should "retrieve a random poem" in {
     implicit val encoder: EntityEncoder[Task, List[PoemResponse]] = jsonEncoderOf[Task, List[PoemResponse]]
 
-    val poem = List(Poem(
+    val poem = List(PoemResponse(
       "Emily Dickinson",
       "I hide myself within my flower,",
-      List(Line("I hide myself within my flower,"),
-        Line("That fading from your Vase,"),
-        Line("You, unsuspecting, feel for me --"),
-        Line("Almost a loneliness.")),
+      List("I hide myself within my flower,",
+        "That fading from your Vase,",
+        "You, unsuspecting, feel for me --",
+        "Almost a loneliness."),
       4
     ))
     val baseUri = Uri.unsafeFromString("https://www.baseuri.com")

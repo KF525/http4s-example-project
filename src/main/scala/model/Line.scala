@@ -3,7 +3,7 @@ package model
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 
-case class Line(words: String)
+case class Line(text: String)
 
 object Line {
   implicit val encoder: Encoder.AsObject[Line] = deriveEncoder[Line]

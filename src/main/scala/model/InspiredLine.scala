@@ -3,7 +3,7 @@ package model
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-case class InspiredLine(author: User, line: String)
+case class InspiredLine(author: User, line: Line)
 
 object InspiredLine {
   implicit val encoder: Encoder.AsObject[InspiredLine] = deriveEncoder[InspiredLine]

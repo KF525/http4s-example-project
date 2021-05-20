@@ -1,8 +1,10 @@
 package http
 
 import cats.effect.Sync
+import client.PoemClient
 import controller.PoemController
-import model.Line
+import model.reponse.PoemResponse
+import model.{Author, Line, Poem}
 import monix.eval.Task
 import org.http4s.{EntityDecoder, Request, Status, Uri}
 import org.http4s.circe._
@@ -25,16 +27,23 @@ class PoemApiTest extends AnyFlatSpec with MockitoSugar with Matchers with Http4
   }
 
   "GET line" should "return a random line from a poem" in withMocks { (client, mockController) =>
-    implicit val decoder: EntityDecoder[Task, Line] = jsonOf[Task, Line]
-    val expectedLine = Line("After all, the sky flashes, the great sea yearns,")
+    implicit val lineDecoder: EntityDecoder[Task, Line] = jsonOf[Task, Line]
+    implicit val poemDecoder: EntityDecoder[Task, Poem] = jsonOf[Task, Poem]
+    implicit val tupleDecoder: EntityDecoder[Task, (Poem, Line)] = jsonOf[Task, (Poem, Line)]
 
-    Mockito.when(mockController.getLine).thenReturn(Sync[Task].delay(expectedLine))
+    val expectedPoem = Poem(Author("EmilyDickinson"), "I hide myself within my flower,",
+      List(Line("I hide myself within my flower,"), Line("That fading from your Vase,"),
+        Line("You, unsuspecting, feel for me --"), Line("Almost a loneliness.")), 4)
+    val expectedLine = Line("You, unsuspecting, feel for me --")
 
-    val (status, user) = client.expect[Line](get(newUserUri))
+    Mockito.when(mockController.getLine).thenReturn(Sync[Task].delay((expectedPoem, expectedLine)))
+
+    val (status, response) = client.expect[(Poem, Line)](get(lineUrl))
+
     status should be(Status.Ok)
-    user should be(expectedLine)
+    response should be((expectedPoem, expectedLine))
   }
 
-  private val newUserUri: Uri = Uri.unsafeFromString("/").addPath("line")
+  private val lineUrl: Uri = Uri.unsafeFromString("/").addPath("line")
   private def get[A](uri: Uri): Task[Request[Task]] = GET(uri)
 }
