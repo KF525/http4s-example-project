@@ -5,6 +5,7 @@ import org.http4s.HttpRoutes
 import controller.UserController
 import org.http4s.circe.CirceEntityDecoder.circeEntityDecoder
 import cats.effect.Sync
+import error.CompoundPoemError.JsonDecodeError
 import model.request.CreateUserRequest
 import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
@@ -18,7 +19,7 @@ class UserApi[F[_] : Sync](userController: UserController[F]) {
   import dsl._
 
   /**
-   * curl -d "{"email": "testuser@gmail.com", "firstName": "test", "lastName": "user"}" -X POST localhost:8027/user
+   * curl -d '{"email": "testuser@gmail.com", "firstName": "test", "lastName": "user"}' -X POST localhost:8027/user
    */
   val routes: HttpRoutes[F] = HttpRoutes.of {
     case rawRequest@POST -> Root / "user" => {
@@ -27,7 +28,6 @@ class UserApi[F[_] : Sync](userController: UserController[F]) {
 //        user <- userController.create(request)
 //        response <- Created(user)
 //      } yield response
-
       val requestAttempt: F[CreateUserRequest] = rawRequest.as[CreateUserRequest]
       println(requestAttempt)
       val request = CreateUserRequest("testuser@gmail.com", "test", "user")

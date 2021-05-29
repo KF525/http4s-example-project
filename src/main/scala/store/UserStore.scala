@@ -5,7 +5,7 @@ import cats.free.Free
 import doobie.free.connection
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
-import model.User
+import model.{Email, User}
 import doobie.implicits._
 import cats.implicits._
 
@@ -20,7 +20,7 @@ class UserStore[F[_]: Sync: ConcurrentEffect : Timer : ContextShift ](transactor
   }
 
   private def createQuery(user: User): Update0 = {
-    val User(first_name, last_name, email) = user
+    val User(first_name, last_name, Email(email)) = user
     sql"insert into poem_user (first_name, last_name, email) values ($first_name, $last_name, $email)".update
   }
 

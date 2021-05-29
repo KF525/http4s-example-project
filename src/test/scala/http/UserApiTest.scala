@@ -2,7 +2,7 @@ package http
 
 import cats.effect.Sync
 import controller.UserController
-import model.User
+import model.{Email, User}
 import model.request.CreateUserRequest
 import monix.eval.Task
 import org.http4s.client.dsl.Http4sClientDsl
@@ -25,13 +25,13 @@ class UserApiTest extends AnyFlatSpec with MockitoSugar with Matchers with Http4
     test(new Http4sTestClient(api.routes), mockController)
   }
 
-  "UserApi" should "create a new user" in withMocks { (client, mockController) =>
+  "POST" should "create a new user" in withMocks { (client, mockController) =>
     implicit val encoder: EntityEncoder[Task, CreateUserRequest] = jsonEncoderOf[Task, CreateUserRequest]
     implicit val decoder: EntityDecoder[Task, User] = jsonOf[Task, User]
 
     val (firstName, lastName, email) = ("test", "user", "testuser@gmail.com")
     val request = CreateUserRequest(email, firstName, lastName)
-    val expectedUser = User(firstName, lastName, email)
+    val expectedUser = User(firstName, lastName, Email(email))
 
     Mockito.when(mockController.create(request)).thenReturn(Sync[Task].delay(expectedUser))
 
@@ -40,7 +40,24 @@ class UserApiTest extends AnyFlatSpec with MockitoSugar with Matchers with Http4
     user should be(expectedUser)
   }
 
+//  it should "delete a user" in withMocks { (client, mockController) =>
+//    implicit val encoder: EntityEncoder[Task, CreateUserRequest] = jsonEncoderOf[Task, CreateUserRequest]
+//    implicit val decoder: EntityDecoder[Task, User] = jsonOf[Task, User]
+//
+//    val (firstName, lastName, email) = ("test", "user", "testuser@gmail.com")
+//    val request = CreateUserRequest(email, firstName, lastName)
+//    val expectedUser = User(firstName, lastName, Email(email))
+//
+//    Mockito.when(mockController.delete(request)).thenReturn(Sync[Task].delay(expectedUser))
+//
+//    val (status, user) = client.expect[User](delete(newUserUri, request))
+//    status should be(Status.Gone)
+//    user should be(expectedUser)
+//  }
+
   private val newUserUri: Uri = Uri.unsafeFromString("/").addPath("user")
   private def post[A](uri: Uri, body: A)(implicit encoder: EntityEncoder[Task, A]): Task[Request[Task]] =
     POST(body, uri) map (_ withEntity body)
+  private def delete[A](uri: Uri, body: A)(implicit encoder: EntityEncoder[Task, A]): Task[Request[Task]] =
+    DELETE(body, uri) map (_ withEntity body)
 }
