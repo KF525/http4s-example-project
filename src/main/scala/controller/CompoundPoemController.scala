@@ -3,7 +3,7 @@ package controller
 import cats.effect.Sync
 import model.{Author, CompoundPoem, InitialLine, InspiredLine, Line}
 import model.request.CompoundPoemRequest
-import store.CompoundPoemStore
+import store.{CompoundPoemStore, UserStore}
 import cats.implicits._
 
 class CompoundPoemController[F[_]: Sync](compoundPoemStore: CompoundPoemStore[F]) {

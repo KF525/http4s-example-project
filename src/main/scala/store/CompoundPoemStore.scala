@@ -1,13 +1,10 @@
 package store
 
 import java.sql.SQLException
-
 import doobie.implicits.toSqlInterpolator
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig
-import doobie.implicits._
-import cats.implicits._
 import cats.effect.{ConcurrentEffect, ContextShift, Sync, Timer}
 import cats.free.Free
 import doobie.free.connection
