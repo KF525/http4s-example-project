@@ -1,6 +1,5 @@
 import cats.effect._
 import monix.eval._
-import org.http4s.server.Server
 
 object Main extends TaskApp {
 
