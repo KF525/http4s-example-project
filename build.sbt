@@ -1,4 +1,4 @@
-name := "restaurant-reservation"
+name := "compound-poem"
 
 version := "0.1"
 
