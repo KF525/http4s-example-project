@@ -19,5 +19,7 @@ services:
       - 8027:8080
     volumes:
       - .:/app
+    command:
+      sbt compound_poem_app/run
 volumes:
   pgdata:
