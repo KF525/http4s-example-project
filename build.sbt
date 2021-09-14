@@ -13,8 +13,9 @@ lazy val root = project.in(file("."))
   .settings(name := "compound_poem")
   .aggregate(compound_poem_app)
 
-lazy val compound_poem_app = project
-  .in(file("compound_poem_app"))
+//lazy val compound_poem_ui = project.in(file("ui"))
+
+lazy val compound_poem_app = project.in(file("compound_poem_app"))
   .settings(
     libraryDependencies ++= Seq(
       "io.circe"                %% "circe-generic"           % circeVersion,

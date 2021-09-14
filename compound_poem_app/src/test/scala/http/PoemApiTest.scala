@@ -4,7 +4,7 @@ import cats.effect.Sync
 import client.PoemClient
 import controller.PoemController
 import model.reponse.PoemResponse
-import model.{Author, Line, Poem}
+import model.{Author, GetLineResponse, Line, Poem}
 import monix.eval.Task
 import org.http4s.{EntityDecoder, Request, Status, Uri}
 import org.http4s.circe._
@@ -35,8 +35,9 @@ class PoemApiTest extends AnyFlatSpec with MockitoSugar with Matchers with Http4
       List(Line("I hide myself within my flower,"), Line("That fading from your Vase,"),
         Line("You, unsuspecting, feel for me --"), Line("Almost a loneliness.")), 4)
     val expectedLine = Line("You, unsuspecting, feel for me --")
+    val expectedGetLineResponse = GetLineResponse(expectedPoem, expectedLine)
 
-    Mockito.when(mockController.getLine).thenReturn(Sync[Task].delay((expectedPoem, expectedLine)))
+    Mockito.when(mockController.getLine).thenReturn(Sync[Task].delay(expectedGetLineResponse))
 
     val (status, response) = client.expect[(Poem, Line)](get(lineUrl))
 

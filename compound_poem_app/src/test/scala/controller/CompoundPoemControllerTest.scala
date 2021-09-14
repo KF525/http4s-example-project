@@ -2,7 +2,7 @@ package controller
 
 import model.{CompoundPoem, InitialLine, InspiredLine}
 import model.request.CompoundPoemRequest
-import store.{CompoundPoemStore, UserStore}
+import store.CompoundPoemStore
 import cats.effect.Sync
 import model.{Author, Line}
 import monix.eval.Task

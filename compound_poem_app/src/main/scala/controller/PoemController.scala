@@ -8,7 +8,7 @@ import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.{ConfigReader, loadConfig}
 import cats.implicits._
-import model.{GetLineResponse, Line, Poem}
+import model.{GetLineResponse, Poem}
 
 import scala.util.Random
 

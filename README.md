@@ -30,4 +30,3 @@ TODO:
 - Make your compound poems private
 - metrics
 - Elastic Search data store?
- 

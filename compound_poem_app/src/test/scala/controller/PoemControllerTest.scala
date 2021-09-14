@@ -3,7 +3,7 @@ package controller
 import cats.effect.Sync
 import client.PoemClient
 import model.reponse.PoemResponse
-import model.{Author, Line, Poem}
+import model.{Author, GetLineResponse, Line, Poem}
 import monix.eval.Task
 import org.mockito.Mockito
 import org.scalatest.flatspec.AnyFlatSpec
@@ -25,23 +25,22 @@ class PoemControllerTest extends AnyFlatSpec with MockitoSugar with Matchers {
 
   "PoemController" should "return a poem and random line from that poem" in withMocks {
     (controller, mockClient) => {
-
-    val expectedPoem = Poem(Author("Emily Dickinson"), "I hide myself within my flower,",
+      val expectedPoem = Poem(Author("Emily Dickinson"), "I hide myself within my flower,",
       List(Line("I hide myself within my flower,"), Line("That fading from your Vase,"),
         Line("You, unsuspecting, feel for me --"), Line("Almost a loneliness.")), 4)
 
-    val poemResponse = List(PoemResponse("Emily Dickinson", "I hide myself within my flower,",
+      val poemResponse = List(PoemResponse("Emily Dickinson", "I hide myself within my flower,",
       List("I hide myself within my flower,", "That fading from your Vase,",
         "You, unsuspecting, feel for me --", "Almost a loneliness."), 4))
 
-    Mockito.when(mockClient.getPoem).thenReturn(Sync[Task].delay(poemResponse))
+      Mockito.when(mockClient.getPoem).thenReturn(Sync[Task].delay(poemResponse))
 
-    val (poem, line) = futureValue(controller.getLine)
+      val getLineResponse = futureValue(controller.getLine)
 
-    poem should be(expectedPoem)
+      getLineResponse.poem should be(expectedPoem)
     }
   }
 
-  private def futureValue[A](response: Task[(Poem, Line)]): (Poem, Line) =
+  private def futureValue[A](response: Task[GetLineResponse]): GetLineResponse =
     Await.result(response.runToFuture, Duration.fromNanos(1000L))
 }
