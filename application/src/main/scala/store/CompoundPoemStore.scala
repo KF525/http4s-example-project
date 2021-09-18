@@ -10,7 +10,7 @@ import cats.free.Free
 import doobie.free.connection
 import doobie.util.transactor.Transactor
 import doobie.util.update.Update0
-import model.{Author, CompoundPoem, InitialLine, InspiredLine, Line, User}
+import model.{Author, CompoundPoem, FirstLine, SecondLine, Line, User}
 import doobie.implicits._
 import cats.implicits._
 
@@ -39,12 +39,12 @@ class CompoundPoemStore[F[_]: Sync: ConcurrentEffect : Timer : ContextShift](tra
   }
 
   private def createQuery(compoundPoem: CompoundPoem): Update0 = {
-    val CompoundPoem(InitialLine(
-    Author(compoundPoem.initialLine.author.name),
-    Line(compoundPoem.initialLine.line.text)),
-    InspiredLine(
-    Author(compoundPoem.inspiredLine.author.name),
-    Line(compoundPoem.inspiredLine.line.text))) = compoundPoem
-    sql"insert into compound_poem (initial_line, inspired_line, initial_author, inspired_author) values (${compoundPoem.initialLine.line.text}, ${compoundPoem.inspiredLine.line.text}, ${compoundPoem.initialLine.author.name}, ${compoundPoem.inspiredLine.author.name})".update
+    val CompoundPoem(FirstLine(
+    Author(compoundPoem.firstLine.author.name),
+    Line(compoundPoem.firstLine.line.text)),
+    SecondLine(
+    Author(compoundPoem.secondLine.author.name),
+    Line(compoundPoem.secondLine.line.text))) = compoundPoem
+    sql"insert into compound_poem (first_line, second_line, first_author, second_author) values (${compoundPoem.firstLine.line.text}, ${compoundPoem.secondLine.line.text}, ${compoundPoem.firstLine.author.name}, ${compoundPoem.secondLine.author.name})".update
   }
 }

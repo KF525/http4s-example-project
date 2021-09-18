@@ -1,7 +1,7 @@
 CREATE TABLE compound_poem (
     id SERIAL,
-    initial_line TEXT,
-    initial_author TEXT,
-    inspired_line TEXT,
-    inspired_author TEXT
+    first_line TEXT,
+    first_author TEXT,
+    second_line TEXT,
+    second_author TEXT
 );

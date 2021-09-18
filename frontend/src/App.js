@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import {Component} from "react";
 
@@ -13,8 +12,11 @@ class App extends Component {
         this.state = {
             error: null,
             isLoaded: false,
-            line: null
+            firstAuthor: null,
+            firstLine: null,
+            secondLine: ""
         };
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount() {
@@ -24,7 +26,8 @@ class App extends Component {
                 (result) => {
                     this.setState({
                         isLoaded: true,
-                        line: result.line
+                        firstLine: result.line.text,
+                        firstAuthor: result.poem.author.name
                     });
                 },
                 // Note: it's important to handle errors here
@@ -39,8 +42,32 @@ class App extends Component {
             )
     }
 
+    saveCompoundPoem() {
+        console.log('this is the current state:', this.state);
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                firstLine: this.state.firstLine,
+                secondLine: this.state.secondLine,
+                firstAuthor: this.state.firstAuthor,
+                secondAuthor: "tada"
+            })
+        };
+
+        fetch('/compound', requestOptions)
+            .then(response => console.log(response.json()));
+            //.then(data => setPostId(data.id));
+    }
+
+    handleChange({ target }) {
+        this.setState({
+            [target.name]: target.value
+        });
+    }
+
     render() {
-        const {error, isLoaded, line} = this.state;
+        const {error, isLoaded, firstLine, firstAuthor, secondLine} = this.state;
         if (error) {
             return <div>Error: {error.message}</div>;
         } else if (!isLoaded) {
@@ -48,8 +75,17 @@ class App extends Component {
         } else {
             return (
                 <div>
-                    <div><strong>Line:</strong>{line.text}</div>
-                    <input/>
+                    <div><strong>Line:</strong>{ firstLine }</div>
+                    <input
+                        type="text"
+                        name="secondLine"
+                        placeholder="Write "
+                        value={ this.state.secondLine }
+                        onChange={ this.handleChange }
+                    />
+                    <button onClick={() => this.saveCompoundPoem()}>
+                        Save
+                    </button>
                 </div>
             );
         }

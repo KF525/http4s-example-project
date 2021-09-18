@@ -1,6 +1,6 @@
 package controller
 
-import model.{CompoundPoem, InitialLine, InspiredLine}
+import model.{CompoundPoem, FirstLine, SecondLine}
 import model.request.CompoundPoemRequest
 import store.CompoundPoemStore
 import cats.effect.Sync
@@ -28,8 +28,8 @@ class CompoundPoemControllerTest extends AnyFlatSpec with MockitoSugar with Matc
     (controller, mockStore) => {
 
       val expectedCompoundPoem = CompoundPoem(
-        InitialLine(Author("Emily Dickinson"), Line("I hide myself within my flower.")),
-        InspiredLine(Author("Me"), Line("Each petal held up quiet the fingertip"))
+        FirstLine(Author("Emily Dickinson"), Line("I hide myself within my flower.")),
+        SecondLine(Author("Me"), Line("Each petal held up quiet the fingertip"))
       )
 
       val compoundPoemRequest = CompoundPoemRequest("I hide myself within my flower.",

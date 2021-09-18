@@ -3,7 +3,7 @@ package http
 import cats.effect.Sync
 import controller.{CompoundPoemController, UserController}
 import model.request.{CompoundPoemRequest, CreateUserRequest}
-import model.{Author, CompoundPoem, Email, InitialLine, InspiredLine, Line, User}
+import model.{Author, CompoundPoem, Email, FirstLine, SecondLine, Line, User}
 import monix.eval.Task
 import org.http4s.{EntityDecoder, EntityEncoder, Request, Status, Uri}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
@@ -31,8 +31,8 @@ class CompoundPoemApiTest extends AnyFlatSpec with MockitoSugar with Matchers wi
 
     val (initialLine, initialAuthor, inspiredLine, inspiredAuthor) = ("line1", "line2", "author1", "author2")
     val request = CompoundPoemRequest(initialLine, initialAuthor, inspiredLine, inspiredAuthor)
-    val expectedCompoundPoem = CompoundPoem(InitialLine(Author(initialAuthor), Line(initialLine)),
-      InspiredLine(Author(inspiredAuthor), Line(inspiredLine)))
+    val expectedCompoundPoem = CompoundPoem(FirstLine(Author(initialAuthor), Line(initialLine)),
+      SecondLine(Author(inspiredAuthor), Line(inspiredLine)))
 
     Mockito.when(mockController.save(request)).thenReturn(Sync[Task].delay(expectedCompoundPoem))
 

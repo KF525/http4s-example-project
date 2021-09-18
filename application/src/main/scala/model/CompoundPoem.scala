@@ -4,13 +4,13 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import model.request.CompoundPoemRequest
 
-case class CompoundPoem(initialLine: InitialLine, inspiredLine: InspiredLine)
+case class CompoundPoem(firstLine: FirstLine, secondLine: SecondLine)
 
 object CompoundPoem {
   def createFromResponse(response: CompoundPoemRequest): CompoundPoem = {
-    val initialLine = InitialLine(Author(response.initialAuthor), Line(response.initialLine))
-    val inspiredLine = InspiredLine(Author(response.inspiredAuthor), Line(response.inspiredLine))
-    CompoundPoem(initialLine, inspiredLine)
+    val firstLine = FirstLine(Author(response.firstAuthor), Line(response.firstLine))
+    val secondLine = SecondLine(Author(response.secondAuthor), Line(response.secondLine))
+    CompoundPoem(firstLine, secondLine)
   }
 
   implicit val encoder: Encoder.AsObject[CompoundPoem] = deriveEncoder[CompoundPoem]
