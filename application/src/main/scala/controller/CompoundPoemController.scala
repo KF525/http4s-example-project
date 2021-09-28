@@ -14,4 +14,8 @@ class CompoundPoemController[F[_]: Sync](compoundPoemStore: CompoundPoemStore[F]
     )
    compoundPoemStore.save(compoundPoem)
   }
+
+  def view: F[List[CompoundPoem]] = {
+    compoundPoemStore.view
+  }
 }

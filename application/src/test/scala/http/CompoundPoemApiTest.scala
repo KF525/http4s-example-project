@@ -9,6 +9,7 @@ import org.http4s.{EntityDecoder, EntityEncoder, Request, Status, Uri}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.io.POST
+import org.http4s.dsl.io.GET
 import org.mockito.Mockito
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -41,7 +42,22 @@ class CompoundPoemApiTest extends AnyFlatSpec with MockitoSugar with Matchers wi
     compoundPoem should be(expectedCompoundPoem)
   }
 
+  "GET" should "return all compound poems" in withMocks { (client, mockController) =>
+    implicit val decoder: EntityDecoder[Task, CompoundPoem] = jsonOf[Task, CompoundPoem]
+
+    val (initialLine, initialAuthor, inspiredLine, inspiredAuthor) = ("line1", "line2", "author1", "author2")
+    val expectedCompoundPoem = List(CompoundPoem(FirstLine(Author(initialAuthor), Line(initialLine)),
+      SecondLine(Author(inspiredAuthor), Line(inspiredLine))))
+
+    Mockito.when(mockController.view).thenReturn(Sync[Task].delay(expectedCompoundPoem))
+
+    val (status, compoundPoem) = client.expect[CompoundPoem](get(compoundPoemUri))
+    status should be(Status.Ok)
+    compoundPoem should be(expectedCompoundPoem)
+  }
+
   private val compoundPoemUri: Uri = Uri.unsafeFromString("/").addPath("compound")
   private def post[A](uri: Uri, body: A)(implicit encoder: EntityEncoder[Task, A]): Task[Request[Task]] =
     POST(body, uri) map (_ withEntity body)
+  private def get[A](uri: Uri) = GET(uri)
 }

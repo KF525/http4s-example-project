@@ -11,26 +11,28 @@ import org.http4s.circe.CirceEntityCodec.{circeEntityDecoder, circeEntityEncoder
 /**
  * An api is essentially a function from request to response: Api: Request[Task] => Task[Response[Task]] (really it is a partial function because a route is not guaranteed to exist) and a request or response is essentially a stream Response/Request: Stream[Task, Byte] (edited)
  */
-class UserApi[F[_] : Sync](userController: UserController[F]) {
+class UserApi[F[_] : Sync](userController: UserController[F],
+                           /*serviceErrorHandler: ServiceErrorHandler[F]*/) {
 
   val dsl: Http4sDsl[F] = new Http4sDsl[F] {}
   import dsl._
 
   /**
-   * curl -d '{"email": "testuser@gmail.com", "firstName": "test", "lastName": "user"}' -X POST localhost:8027/user
+   * curl -d '{"email": "testuser@gmail.com", "firstName": "test", "lastName": "user"}' -X POST localhost:8001/user
    */
   val routes: HttpRoutes[F] = HttpRoutes.of {
     case rawRequest@POST -> Root / "user" =>
-    for {
-      request <- rawRequest.as[CreateUserRequest]
-      user <- userController.create(request)
-      response <- Created(user)
-    } yield response
+      for {
+        request <- rawRequest.as[CreateUserRequest]
+        user <- userController.create(request)
+        response <- Created(user)
+      } yield response
+    case GET -> Root / "user" / IntVar(userId) =>
+      //serviceErrorHandler.handleErrors {
+        for {
+          user <- userController.get(userId)
+          response <- Ok(user)
+        } yield response
+      //}
   }
 }
-
-//      for {
-//        request <- rawRequest.attemptAs[CreateUserRequest].leftMap(failedDecoder => JsonDecodeError(failedDecoder))
-//        user <- userController.create(request)
-//        response <- Created(user)
-//      } yield response

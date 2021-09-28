@@ -36,13 +36,27 @@ class CompoundPoemControllerTest extends AnyFlatSpec with MockitoSugar with Matc
         "Each petal held up quiet the fingertip", "Emily Dickinson", "Me")
 
       Mockito.when(mockStore.save(expectedCompoundPoem)).thenReturn(Sync[Task].delay(expectedCompoundPoem))
-
       val compoundPoem = futureValue(controller.save(compoundPoemRequest))
 
       compoundPoem should be(expectedCompoundPoem)
     }
   }
 
-  private def futureValue[A](response: Task[CompoundPoem]): CompoundPoem =
+  it should "show compound poems" in withMocks {
+    (controller, mockStore) => {
+
+      val expectedCompoundPoem = List(CompoundPoem(
+        FirstLine(Author("Emily Dickinson"), Line("I hide myself within my flower.")),
+        SecondLine(Author("Me"), Line("Each petal held up quiet the fingertip")))
+      )
+
+      Mockito.when(mockStore.view).thenReturn(Sync[Task].delay(expectedCompoundPoem))
+      val compoundPoem = futureValue(controller.view)
+
+      compoundPoem should be(expectedCompoundPoem)
+    }
+  }
+
+  private def futureValue[A](response: Task[A]): A =
         Await.result(response.runToFuture, Duration.fromNanos(1000L))
 }

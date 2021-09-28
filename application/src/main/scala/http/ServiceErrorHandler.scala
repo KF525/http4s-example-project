@@ -9,9 +9,6 @@ import cats.implicits._
 
 class ServiceErrorHandler[F[_]] extends Http4sDsl[F]{
 
-  /**
-   *
-   */
   def handleErrors[E](eitherT: EitherT[F, E, F[Response[F]]])(implicit m: Monad[F], async: Async[F], encoder: EntityEncoder[F, E], statusForError: E => Status): F[Response[F]] = {
 
     def convertError(error: E): F[Response[F]] =

@@ -8,14 +8,8 @@ import org.http4s.{EntityDecoder, Method, Request, Uri}
 
 class PoemClient[F[_]: Sync](client: Client[F], baseUri: Uri) {
 
-  /**
-   * Http4s client expect submits a request and decodes response on success.
-   * Status code returned on failure.
-   * Underlying HTTP connection is closed at completion of decoding.
-   */
   def getPoem: F[List[PoemResponse]] = {
     implicit val decoder: EntityDecoder[F, List[PoemResponse]] = jsonOf[F, List[PoemResponse]]
     client.expect[List[PoemResponse]](Request[F](Method.GET, baseUri / "random" / "1"))
   }
-
 }

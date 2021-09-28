@@ -8,6 +8,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 
 class PoemApi[F[_]: Sync](poemController: PoemController[F]) {
+
   val dsl: Http4sDsl[F] = new Http4sDsl[F] {}
   import dsl._
 

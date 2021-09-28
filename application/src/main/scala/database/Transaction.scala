@@ -17,7 +17,10 @@ import scala.concurrent.duration.DurationInt
 
 class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {
 
-     /**  Returns a Resource yielding a transactor configured with a bounded connect EC and an unbounded transaction EC. The Transactor can transform ConnectionIO ~> IO, which gives us a program we can run. Specifically it gives us an IO that, when run, will connect to a database and execute a single transaction. Everything will be closed and shut down cleanly after use. */
+  /**  Returns a Resource yielding a transactor configured with a bounded connect EC and an unbounded transaction EC.
+   * The Transactor can transform ConnectionIO ~> IO, which gives us a program we can run.
+   * Specifically it gives us an IO that, when run, will connect to a database and execute a single transaction.
+   * Everything will be closed and shut down cleanly after use. */
   def createTransactor: Resource[F, HikariTransactor[F]] = {
     val hikariConfig = new HikariConfig()
     hikariConfig.setDriverClassName("org.postgresql.Driver")

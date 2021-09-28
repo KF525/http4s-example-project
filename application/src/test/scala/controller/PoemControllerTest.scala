@@ -2,8 +2,8 @@ package controller
 
 import cats.effect.Sync
 import client.PoemClient
-import model.reponse.PoemResponse
-import model.{Author, GetLineResponse, Line, Poem}
+import model.reponse.{PoemLineResponse, PoemResponse}
+import model.{Author, Line, Poem}
 import monix.eval.Task
 import org.mockito.Mockito
 import org.scalatest.flatspec.AnyFlatSpec
@@ -41,6 +41,6 @@ class PoemControllerTest extends AnyFlatSpec with MockitoSugar with Matchers {
     }
   }
 
-  private def futureValue[A](response: Task[GetLineResponse]): GetLineResponse =
+  private def futureValue[A](response: Task[PoemLineResponse]): PoemLineResponse =
     Await.result(response.runToFuture, Duration.fromNanos(1000L))
 }

@@ -9,6 +9,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.circe.CirceEntityCodec.{circeEntityDecoder, circeEntityEncoder}
 
 class CompoundPoemApi[F[_]: Sync](controller: CompoundPoemController[F]) {
+
   val dsl: Http4sDsl[F] = new Http4sDsl[F] {}
   import dsl._
 
@@ -21,6 +22,11 @@ class CompoundPoemApi[F[_]: Sync](controller: CompoundPoemController[F]) {
         request <- rawRequest.as[CompoundPoemRequest]
         poem <- controller.save(request)
         response <- Created(poem)
+      } yield response
+    case GET -> Root / "compound" =>
+      for {
+        poems <- controller.view
+        response <- Ok(poems)
       } yield response
   }
 }
