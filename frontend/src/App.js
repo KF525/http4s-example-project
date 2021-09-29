@@ -17,8 +17,13 @@ class App extends Component {
     };
   }
 
+
   componentDidMount() {
-    fetch('/line')
+    this.getPrompt()
+  }
+
+  getPrompt = async () => {
+    await fetch('/line')
       .then(res => res.json())
       .then(
         (result) => {
@@ -38,7 +43,7 @@ class App extends Component {
           });
         }
       )
-  }
+  };
 
   async saveCompoundPoem() {
     this.setState({saving: true})
@@ -55,6 +60,7 @@ class App extends Component {
 
     const response = await fetch('/compound', requestOptions)
     const savedPoem = await response.json()
+    await this.getPrompt()
     this.setState((prevState) => {
       return {savedLines: [...prevState.savedLines, savedPoem], saving: false, secondLine: ""}
     })
