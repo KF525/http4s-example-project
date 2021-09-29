@@ -56,8 +56,8 @@ class App extends Component {
     const response = await fetch('/compound', requestOptions)
     const savedPoem = await response.json()
     this.setState((prevState) => {
-      return {savedLines: [...prevState.savedLines, savedPoem]}
-    }, () => this.setState({saving: false}))
+      return {savedLines: [...prevState.savedLines, savedPoem], saving: false, secondLine: ""}
+    })
   }
 
   render() {
