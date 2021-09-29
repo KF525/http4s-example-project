@@ -1,11 +1,8 @@
 import './App.css';
 import {Component} from "react";
+import {CompoundPoem} from "./CompoundPoem";
 
 class App extends Component {
-  //initialize component state - controlled way of managing component. "local database" - component reacts to state
-  //constructor -> render (1+) -> componentDidMount (takes x amount of time) as soon as isLoaded true, render will display
-  //never edit state in render
-  //componentDidMount safe to edit state
 
   constructor(props) {
     super(props);
@@ -15,7 +12,8 @@ class App extends Component {
       firstAuthor: null,
       firstLine: null,
       secondLine: "",
-      savedLines: []
+      savedLines: [],
+      saving: false
     };
   }
 
@@ -43,7 +41,7 @@ class App extends Component {
   }
 
   async saveCompoundPoem() {
-    console.log('this is the current state:', this.state);
+    this.setState({saving: true})
     const requestOptions = {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -59,7 +57,7 @@ class App extends Component {
     const savedPoem = await response.json()
     this.setState((prevState) => {
       return {savedLines: [...prevState.savedLines, savedPoem]}
-    })
+    }, () => this.setState({saving: false}))
   }
 
   render() {
@@ -72,7 +70,7 @@ class App extends Component {
       return (
         <>
           <div>
-            {this.state.savedLines.map((poem, i) => <div key={i}>{poem.firstLine.line.text}<br />{poem.secondLine.line.text}</div>)}
+            {this.state.savedLines.map((poem, i) => <CompoundPoem key={i} poem={poem}/>)}
           </div>
           <div>
             <div><strong>Line:</strong>{firstLine}</div>
@@ -83,7 +81,7 @@ class App extends Component {
               value={this.state.secondLine}
               onChange={(event) => this.setState({secondLine: event.target.value})}
             />
-            <button onClick={() => this.saveCompoundPoem()}>
+            <button onClick={() => this.saveCompoundPoem()} disabled={this.state.saving}>
               Save
             </button>
           </div>
