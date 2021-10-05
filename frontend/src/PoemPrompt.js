@@ -1,4 +1,5 @@
 import {Component} from "react";
+import {saveCompoundPoem} from "./saveCompoundPoem";
 
 export class PoemPrompt extends Component {
 
@@ -36,21 +37,11 @@ export class PoemPrompt extends Component {
         }
       );
 
-  async saveCompoundPoem() {
+  async save() {
     this.setState({saving: true})
-    const requestOptions = {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        firstLine: this.state.firstLine,
-        secondLine: this.state.secondLine,
-        firstAuthor: this.state.firstAuthor,
-        secondAuthor: "tada"
-      })
-    };
 
-    const response = await fetch('/compound', requestOptions)
-    const savedPoem = await response.json()
+    const {firstAuthor, secondLine, firstLine} = this.state;
+    const savedPoem = await saveCompoundPoem(firstLine, secondLine, firstAuthor)
     await this.getPrompt()
     this.props.addCompoundPoem(savedPoem)
     this.setState(() => {
@@ -71,7 +62,7 @@ export class PoemPrompt extends Component {
           value={this.state.secondLine}
           onChange={(event) => this.setState({secondLine: event.target.value})}
         />
-        <button onClick={() => this.saveCompoundPoem()}>
+        <button onClick={() => this.save()}>
           Save
         </button>
       </div>;
