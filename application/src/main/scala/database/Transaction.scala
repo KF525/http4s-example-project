@@ -12,7 +12,6 @@ import org.flywaydb.core.api.configuration.FluentConfiguration
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.loadConfig
-
 import scala.concurrent.duration.DurationInt
 
 class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {

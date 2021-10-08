@@ -19,7 +19,10 @@ class Http4sTestClient(service: HttpRoutes[Task]) extends Matchers {
   }
 
   private def extractStatusAndBody[A](response: Response[Task])(implicit e: EntityDecoder[Task, A]): Task[(Status, A)] = {
-    response.as[A].map(value => (response.status, value))
+    val x: Task[(Status, A)] = response.as[A].map(value => {
+      (response.status, value)
+    })
+    x
   }
 
   private def futureValue[A](response: Task[(Status, A)])(implicit scheduler: Scheduler): (Status, A) =

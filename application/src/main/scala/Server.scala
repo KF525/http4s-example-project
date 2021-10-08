@@ -4,10 +4,10 @@ import client.PoemClient
 import config.{DatabaseConfig, ServiceConfig}
 import database.Transaction
 import doobie.Transactor
-import http.{CompoundPoemApi, PoemApi, UserApi}
+import http.{CompoundPoemApi, PoemApi}
 import org.http4s.{HttpRoutes, Uri}
 import monix.execution.Scheduler.Implicits.global
-import store.{CompoundPoemStore, UserStore}
+import store.{CompoundPoemStore}
 import pureconfig.ConfigSource
 import pureconfig.generic.auto.exportReader
 import pureconfig.{ConfigReader, loadConfig}
@@ -15,7 +15,7 @@ import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server._
 import cats.implicits._
-import controller.{CompoundPoemController, PoemController, UserController}
+import controller.{CompoundPoemController, PoemController}
 import org.http4s.implicits._
 
 import scala.concurrent.duration.DurationInt
@@ -28,9 +28,9 @@ object Server {
 
     for {
       client <- BlazeClientBuilder[F](global)
-        .withConnectTimeout(serviceConfig.connectTimeout.seconds)
-        .withRequestTimeout(serviceConfig.requestTimeout.seconds).resource
-      poemClient = new PoemClient[F](client, Uri.unsafeFromString("https://poetrydb.org/"))
+        .withConnectTimeout(serviceConfig.connectTimeout)
+        .withRequestTimeout(serviceConfig.requestTimeout).resource
+      poemClient: PoemClient[F] = new PoemClient[F](client, Uri.unsafeFromString("https://poetrydb.org/"))
       database <- new Transaction[F](databaseConfig).createTransactor
       _ <- Transaction.initialize(database)
       server <- buildService(serviceConfig, poemClient, database)
@@ -57,9 +57,9 @@ object Server {
     val poemApi: HttpRoutes[F] = new PoemApi[F](new PoemController[F](client)).routes
     val compoundPoemController = new CompoundPoemController[F](new CompoundPoemStore[F](database))
     val compoundPoemApi: HttpRoutes[F] = new CompoundPoemApi[F](compoundPoemController).routes
-    val userApi: HttpRoutes[F] = new UserApi[F](
-      new UserController[F](new UserStore[F](database))).routes
-    poemApi <+> compoundPoemApi <+> userApi
+//    val userApi: HttpRoutes[F] = new UserApi[F](
+//      new UserController[F](new UserStore[F](database))).routes
+    poemApi <+> compoundPoemApi //<+> userApi
   }
 
   def buildServer[F[_] : ConcurrentEffect : Timer : ContextShift]

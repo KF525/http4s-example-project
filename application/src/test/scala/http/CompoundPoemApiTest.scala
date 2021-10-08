@@ -1,7 +1,7 @@
 package http
 
 import cats.effect.Sync
-import controller.{CompoundPoemController, UserController}
+import controller.{CompoundPoemController}
 import model.request.{CompoundPoemRequest, CreateUserRequest}
 import model.{Author, CompoundPoem, Email, FirstLine, SecondLine, Line, User}
 import monix.eval.Task
