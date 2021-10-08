@@ -1,5 +1,5 @@
 import {Component} from "react";
-import {saveCompoundPoem} from "./saveCompoundPoem";
+import {fetchLine, savePoem} from "./PoemApi";
 
 export class PoemPrompt extends Component {
 
@@ -9,39 +9,27 @@ export class PoemPrompt extends Component {
       saving: false,
       firstLine: null,
       firstLineLoaded: false,
+      firstAuthor: null,
       secondLine: ""
     };
   }
 
   componentDidMount = () => this.getPrompt()
 
-  getPrompt = () =>
-    fetch('/line')
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            firstLineLoaded: true,
-            firstLine: result.line.text,
-            firstAuthor: result.poem.author.name
-          });
-        },
-        // Note: it's important to handle errors here
-        // instead of a catch() block so that we don't swallow
-        // exceptions from actual bugs in components.
-        (error) => {
-          this.setState({
-            firstLineLoaded: false,
-            error
-          });
-        }
-      );
+  getPrompt = async () => {
+    const {error, firstLine, firstAuthor} = await fetchLine()
+    if (error) {
+      this.setState({firstLineLoaded: false})
+    } else {
+      this.setState({firstLineLoaded: true, firstLine, firstAuthor})
+    }
+  }
 
-  async save() {
+  async doSaveAndUpdate() {
     this.setState({saving: true})
 
     const {firstAuthor, secondLine, firstLine} = this.state;
-    const savedPoem = await saveCompoundPoem(firstLine, secondLine, firstAuthor)
+    const savedPoem = await savePoem(firstLine, secondLine, firstAuthor)
     await this.getPrompt()
     this.props.addCompoundPoem(savedPoem)
     this.setState(() => {
@@ -62,10 +50,8 @@ export class PoemPrompt extends Component {
           value={this.state.secondLine}
           onChange={(event) => this.setState({secondLine: event.target.value})}
         />
-        <button onClick={() => this.save()}>
-          Save
-        </button>
-      </div>;
+        <button onClick={this.doSaveAndUpdate}>Save</button>
+      </div>
     }
   }
 }
