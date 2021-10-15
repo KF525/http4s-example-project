@@ -7,8 +7,8 @@ export class PoemPrompt extends Component {
     super(props);
     this.state = {
       saving: false,
+      promptLoading: true,
       firstLine: null,
-      firstLineLoaded: false,
       firstAuthor: null,
       secondLine: ""
     };
@@ -17,17 +17,16 @@ export class PoemPrompt extends Component {
   componentDidMount = () => this.getPrompt()
 
   getPrompt = async () => {
+    this.setState({promptLoading: true})
     const {error, firstLine, firstAuthor} = await fetchLine()
-    if (error) {
-      this.setState({firstLineLoaded: false})
-    } else {
-      this.setState({firstLineLoaded: true, firstLine, firstAuthor})
+    if (!error) {
+      this.setState({promptLoading: false, firstLine, firstAuthor})
     }
   }
 
-  async doSaveAndUpdate() {
+  //arrow functions automatically get this bound
+  doSaveAndUpdate = async () => {
     this.setState({saving: true})
-
     const {firstAuthor, secondLine, firstLine} = this.state;
     const savedPoem = await savePoem(firstLine, secondLine, firstAuthor)
     await this.getPrompt()
@@ -35,10 +34,10 @@ export class PoemPrompt extends Component {
     this.setState(() => {
       return {saving: false, secondLine: ""}
     })
-  }
+  };
 
   render() {
-    if (!this.state.firstLineLoaded || this.state.saving) {
+    if (this.state.promptLoading || this.state.saving) {
       return <div>Getting a prompt....</div>
     } else {
       return <div>
