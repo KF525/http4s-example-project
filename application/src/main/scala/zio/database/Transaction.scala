@@ -1,7 +1,7 @@
 package zio.database
 
 import cats.effect.{Blocker, Resource}
-import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import config.DatabaseConfig
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
@@ -13,24 +13,33 @@ import zio.{Managed, Task, ZIO}
 import zio.interop.catz._
 import zio.interop.console.cats.putStrLn
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.DurationInt
+
 class Transaction {
 
   def createTransactor(databaseConfig: DatabaseConfig)
                       (implicit rt: zio.Runtime[Blocking]): Managed[Throwable, HikariTransactor[Task]] = {
-    val res: Resource[Task, HikariTransactor[Task]] = for {
-      connectEC  <- ExecutionContexts.fixedThreadPool[Task](2)
+    val hikariConfig = new HikariConfig()
+    hikariConfig.setDriverClassName("org.postgresql.Driver")
+    hikariConfig.setJdbcUrl(databaseConfig.url)
+    hikariConfig.setUsername(databaseConfig.username)
+    hikariConfig.setPassword(databaseConfig.password)
+    hikariConfig.setMaxLifetime(345.seconds.toMillis)
+    hikariConfig.setMaximumPoolSize(databaseConfig.maximumPoolSize)
+    hikariConfig.setMinimumIdle(databaseConfig.minimumIdle)
+
+    val transactor: Resource[Task, HikariTransactor[Task]] = for {
+      connectEC <- ExecutionContexts.fixedThreadPool[Task](2)
       transactEC <- ExecutionContexts.cachedThreadPool[Task]
-      xa <- HikariTransactor.newHikariTransactor[Task](
-        databaseConfig.driver,
-        databaseConfig.url,
-        databaseConfig.username,
-        databaseConfig.password,
+      xa <- HikariTransactor.fromHikariConfig[Task](
+        hikariConfig,
         connectEC,
         Blocker.liftExecutionContext(transactEC)
       )
     } yield xa
 
-    res.toManaged
+    transactor.toManagedZIO
   }
 }
 

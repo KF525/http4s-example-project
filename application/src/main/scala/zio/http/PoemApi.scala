@@ -1,19 +1,21 @@
 package zio.http
 
-import org.http4s.HttpRoutes
+import model.reponse.PoemLineResponse
+import org.http4s.{HttpRoutes, Response}
+import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.Http4sDsl
-import zio.Task
+import zio.{Task, ZIO}
 import zio.controller.PoemController
 import zio.interop.catz._
-import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 
 class PoemApi(poemController: PoemController) extends Http4sDsl[Task] {
 
-  val routes: HttpRoutes[Task] = HttpRoutes.of {
-    case GET -> Root / "line" => Ok("")
-//      for {
-//        line <- poemController.getLine
-//        response <- Ok(line)
-//      } yield response
+  val routes =
+    HttpRoutes.of {
+      case GET -> Root / "line" =>
+      for {
+        line <- poemController.getLine
+        response <- Ok(line)
+      } yield response
   }
 }

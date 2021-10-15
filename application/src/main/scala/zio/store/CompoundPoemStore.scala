@@ -5,6 +5,7 @@ import doobie.Update0
 import doobie.Query0
 import zio.interop.catz._
 import doobie.implicits._
+import doobie.util.query
 import zio._
 //import doobie.util.query
 //import doobie.util.transactor.Transactor
@@ -20,7 +21,6 @@ class CompoundPoemStore(transactor: Transactor[Task]) {
   //implicit val runtime: Runtime[Any] = Runtime.default
 
   def create(compoundPoem: CompoundPoem): Task[CompoundPoem] = {
-    val x: Any =
   createQuery(compoundPoem).run.transact {
         transactor
       }

@@ -1,16 +1,15 @@
 package zio.client
 
 import model.reponse.PoemResponse
-import org.http4s.Uri
-import org.http4s.dsl.Http4sDsl
-import zio.duration.durationInt
-import zio.error.{PoemBadResponseFailure, PoemFailure, PoemTimedOutWithoutResponseFailure}
-import zio.ziohttp4stest.ClientTestingHelper.withResponse
-import zio.{BaseSpec, Task}
-import zio.interop.catz._
-import zio.ziotestsyntax.ZioTestSyntax.ZioTestHelper
 import org.http4s._
 import org.http4s.circe.jsonEncoderOf
+import org.http4s.dsl.Http4sDsl
+import org.mockito.Mockito.when
+import org.scalatestplus.mockito.MockitoSugar.mock
+import zio.error.PoemFailure
+import zio.error.PoemFailure.{PoemBadResponseFailure, PoemTimedOutWithoutResponseFailure}
+import zio.ziotestsyntax.ZioTestSyntax.{OngoingZioStubbingHelper, ZioTestHelper}
+import zio.{BaseSpec, Task}
 
 class PoemClientSpec extends BaseSpec with Http4sDsl[Task] {
   implicit val encoder: EntityEncoder[Task, List[PoemResponse]] = jsonEncoderOf[Task, List[PoemResponse]]
@@ -22,46 +21,31 @@ class PoemClientSpec extends BaseSpec with Http4sDsl[Task] {
   "PoemClient" should "respond successfully" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
     val expectedUri = Uri.unsafeFromString("https://www.poem.com/random/1")
+    val mockHttp4sClient = mock[Http4sClient]
+    when(mockHttp4sClient.getRequest(baseUri)).thenSucceed(poem)
+    val client = new PoemClient(mockHttp4sClient, baseUri)
 
-    val makeRequest = withResponse(Ok(poem)) { client =>
-      val poem = new PoemClient(client, baseUri)
-      poem.makeRequest
-    }
-
-    val (request, _) = makeRequest.unsafeRun
-
-    request.uri shouldBe expectedUri
-    request.method shouldBe Method.GET
+    client.makeRequest.unsafeRun
   }
 
   it should "handle errors when it fails" in {
     val baseUri = Uri.unsafeFromString("https://www.poetry.com")
-    val contentTypeString = "text/plain"
-    //val expectedContentType = `Content-Type`(MediaType.unsafeParse(contentTypeString))
-    val expectedBody = "body"
+    val mockHttp4sClient = mock[Http4sClient]
+    when(mockHttp4sClient.getRequest(baseUri)).thenFail(PoemBadResponseFailure("not ok", BadRequest))
+    val client = new PoemClient(mockHttp4sClient, baseUri)
 
-    val makeRequest = withResponse(BadRequest("Not ok")) { client =>
-      val notifier = new PoemClient(client, baseUri)
-      notifier.makeRequest
-    }
+    val failure: PoemFailure = client.makeRequest.runFailure
 
-    val failure: PoemFailure = makeRequest.runFailure
-
-    failure should be(PoemBadResponseFailure("Not ok", Status.BadRequest))
+    failure should be(PoemBadResponseFailure("not ok", Status.BadRequest))
   }
 
   it should "handle errors when it fails with Timeout" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
-    //val contentTypeString = "text/plain"
-    //val expectedContentType = `Content-Type`(MediaType.unsafeParse(contentTypeString))
-    val expectedBody = "body"
+    val mockHttp4sClient = mock[Http4sClient]
+    when(mockHttp4sClient.getRequest(baseUri)).thenFail(PoemTimedOutWithoutResponseFailure)
+    val client = new PoemClient(mockHttp4sClient, baseUri)
 
-    val makeRequest = withResponse(Ok(poem), 10.second) { client =>
-      val notifier = new PoemClient(client, baseUri, 0, 0.seconds, 10.millis)
-      notifier.makeRequest
-    }
-
-    val failure: PoemFailure = makeRequest.runFailure
+    val failure: PoemFailure = client.makeRequest.runFailure
 
     failure should be(PoemTimedOutWithoutResponseFailure)
   }
