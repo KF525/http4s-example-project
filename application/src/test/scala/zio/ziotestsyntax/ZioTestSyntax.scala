@@ -10,7 +10,7 @@ object ZioTestSyntax {
     def runFailure: E = {
       val failedZio = z.either.flatMap {
         case Left(err) => ZIO.succeed(err)
-        case Right(_) => ZIO.fail(new RuntimeException("Expected error but didn't get one"))
+        case Right(_) => ZIO.fail(new RuntimeException("Expected monix.error but didn't get one"))
       }
       zio.Runtime.default.unsafeRun(failedZio)
     }
@@ -52,7 +52,7 @@ object ZioTestSyntax {
   //      //case zio.Schedule.Decision.Continue(out, _, _) => out)
   //    //})
   //
-  //    //timeoutFail: The same as timeout, but instead of producing a None in the event of timeout, it will produce the specified error.
+  //    //timeoutFail: The same as timeout, but instead of producing a None in the event of timeout, it will produce the specified monix.error.
   //    val tasks2: List[ZIO[Console with Clock, NotifierTimeoutError, Unit]] = List(
   //      putStrLn("a").delay(6.second).timeoutFail(ZioTimeoutError)(5.seconds),
   //      putStrLn("b").delay(6.seconds).timeoutFail(ZioTimeoutError)(5.seconds),

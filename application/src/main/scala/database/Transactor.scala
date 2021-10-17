@@ -1,4 +1,4 @@
-package zio.database
+package database
 
 import cats.effect.Blocker
 import com.typesafe.config.Config
@@ -32,10 +32,17 @@ object DBTransactor {
           Blocker.liftExecutionContext(transactEC)
         ).toManagedZIO
 
+  val managedTransaction: ZManaged[Blocking, Throwable, Transactor[Task]] =
+    for {
+      config <- Task.effectTotal(DatabaseConfig.load().getOrElse(throw new RuntimeException("Failed to load monix.database config"))).toManaged_
+      connectEC <- ZIO.descriptor.map(_.executor.asEC).toManaged_
+      blockingEC <- blocking.blocking(ZIO.descriptor.map(_.executor.asEC)).toManaged_
+      transactor <- makeTransactor(config, connectEC, blockingEC)
+    } yield transactor
 
-    val managed: ZManaged[Has[DatabaseConfig] with Blocking, Throwable, Transactor[Task]] =
+  val managed: ZManaged[Has[DatabaseConfig] with Blocking, Throwable, Transactor[Task]] =
       for {
-        config <- Task.effectTotal(DatabaseConfig.load().getOrElse(throw new RuntimeException("Failed to load database config"))).toManaged_
+        config <- Task.effectTotal(DatabaseConfig.load().getOrElse(throw new RuntimeException("Failed to load monix.database config"))).toManaged_
         connectEC <- ZIO.descriptor.map(_.executor.asEC).toManaged_
         blockingEC <- blocking.blocking(ZIO.descriptor.map(_.executor.asEC)).toManaged_
         transactor <- makeTransactor(config, connectEC, blockingEC)
@@ -60,7 +67,7 @@ object Migration {
   //DBTransactor.configure(dataSource => loadFlyWayAndMigrate(dataSource))
   //dataSource: HikariDataSource
   val migrate: RIO[Has[DatabaseConfig], Unit] =
-    Task.effectTotal(DatabaseConfig.load().getOrElse(throw new RuntimeException("Failed to load database config")))
+    Task.effectTotal(DatabaseConfig.load().getOrElse(throw new RuntimeException("Failed to load monix.database config")))
       .flatMap { cfg =>
         ZIO.effect {
           Flyway.configure()
@@ -75,6 +82,6 @@ object Migration {
         }.unit
         // }
       }
-      //.tapError(err => ZIO.fail(s"Error migrating database: $err.")))
+      //.tapError(err => ZIO.fail(s"Error migrating monix.database: $err.")))
 }
 

@@ -1,25 +1,26 @@
 package controller
 
-import cats.ApplicativeError
-import error.CompoundPoemError.NoPoemError
-import cats.effect.Sync
-import client.PoemClient
-import pureconfig.ConfigSource
-import pureconfig.generic.auto.exportReader
-import pureconfig.{ConfigReader, loadConfig}
-import cats.implicits._
-import model.{Poem, reponse}
+import model.{Author, CompoundPoem, FirstLine, Line, Poem, SecondLine}
 import model.reponse.PoemLineResponse
+import client.PoemClient
+import zio.clock.Clock
+import zio.console.{Console, putStrLn}
+import error.PoemFailure.NoPoemError
+import model.request.CompoundPoemRequest
+import zio.{Task, ZIO}
 
 import scala.util.Random
 
-class PoemController[F[_]: Sync](poemClient: PoemClient[F]) {
+class PoemController(client: PoemClient, clock: Clock, console: Console) {
 
-  def getLine: F[PoemLineResponse] =
-    for {
-      maybePoemResponse <- poemClient.getPoem.map(_.headOption)
-      poemResponse <- ApplicativeError[F, Throwable].fromOption(maybePoemResponse, NoPoemError("No poem found"))
-      poem = Poem.createPoem(poemResponse)
-      line = poem.lines.apply(Random.nextInt(poem.lines.size))
-    } yield reponse.PoemLineResponse(poem, line)
+  def getLine: Task[PoemLineResponse] = for {
+    line <- client.makeRequest.provide(clock ++ console).map(_.headOption).flatMap {
+      case Some(p) =>
+        val poem = Poem.createPoem(p)
+        val line = poem.lines.apply(Random.nextInt(poem.lines.size))
+        ZIO.succeed(PoemLineResponse(poem, line))
+      case None =>
+        ZIO.fail(NoPoemError)
+    }
+  } yield line
 }

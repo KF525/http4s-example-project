@@ -1,4 +1,4 @@
-package zio.client
+package client
 
 import model.reponse.PoemResponse
 import org.http4s.Method.GET
@@ -7,8 +7,8 @@ import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.impl.Statuses
 import org.http4s.{Request, Response, Uri}
-import zio.error.PoemFailure
-import zio.error.PoemFailure.{PoemBadResponseFailure, PoemGeneralFailure}
+import error.PoemFailure
+import error.PoemFailure.{PoemBadResponseFailure, PoemGeneralFailure}
 import zio.interop.catz._
 import zio.{IO, Task}
 

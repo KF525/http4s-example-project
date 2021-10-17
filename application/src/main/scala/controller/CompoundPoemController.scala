@@ -1,21 +1,22 @@
 package controller
 
-import cats.effect.Sync
-import model.{Author, CompoundPoem, FirstLine, SecondLine, Line}
+import model.{Author, CompoundPoem, FirstLine, Line, SecondLine}
 import model.request.CompoundPoemRequest
 import store.CompoundPoemStore
+import zio.Task
 
-class CompoundPoemController[F[_]: Sync](compoundPoemStore: CompoundPoemStore[F]) {
+class CompoundPoemController(compoundPoemStore: CompoundPoemStore) {
 
-  def save(request: CompoundPoemRequest): F[CompoundPoem] = {
+  def save(request: CompoundPoemRequest): Task[CompoundPoem] = {
     val compoundPoem = CompoundPoem(
       FirstLine(Author(request.firstAuthor), Line(request.firstLine)),
       SecondLine(Author(request.secondAuthor), Line(request.secondLine))
     )
-   compoundPoemStore.save(compoundPoem)
+    compoundPoemStore.create(compoundPoem)
   }
 
-  def view: F[List[CompoundPoem]] = {
-    compoundPoemStore.view
-  }
+//  def view: Task[List[CompoundPoem]] = {
+//    compoundPoemStore.view
+//  }
+
 }

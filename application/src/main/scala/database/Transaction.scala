@@ -1,26 +1,26 @@
 package database
 
-import cats.Applicative
-import cats.effect.{Async, Blocker, ContextShift, Resource, Sync}
-import com.zaxxer.hikari._
+import cats.effect.{Blocker, Resource}
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import config.DatabaseConfig
+import doobie.Transactor
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
-import javax.sql.DataSource
 import org.flywaydb.core.Flyway
-import org.flywaydb.core.api.configuration.FluentConfiguration
-import pureconfig.ConfigSource
-import pureconfig.generic.auto.exportReader
-import pureconfig.loadConfig
+import org.flywaydb.core.api.output.MigrateResult
+import zio.blocking.Blocking
+import zio.console.Console
+import zio.{Managed, Task, ZIO}
+import zio.interop.catz._
+import zio.interop.console.cats.putStrLn
+
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
-class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {
+class Transaction {
 
-  /**  Returns a Resource yielding a transactor configured with a bounded connect EC and an unbounded transaction EC.
-   * The Transactor can transform ConnectionIO ~> IO, which gives us a program we can run.
-   * Specifically it gives us an IO that, when run, will connect to a database and execute a single transaction.
-   * Everything will be closed and shut down cleanly after use. */
-  def createTransactor: Resource[F, HikariTransactor[F]] = {
+  def createTransactor(databaseConfig: DatabaseConfig)
+                      (implicit rt: zio.Runtime[Blocking]): Managed[Throwable, Transactor[Task]] = {
     val hikariConfig = new HikariConfig()
     hikariConfig.setDriverClassName("org.postgresql.Driver")
     hikariConfig.setJdbcUrl(databaseConfig.url)
@@ -30,43 +30,35 @@ class Transaction[F[_]: Async : ContextShift](databaseConfig: DatabaseConfig) {
     hikariConfig.setMaximumPoolSize(databaseConfig.maximumPoolSize)
     hikariConfig.setMinimumIdle(databaseConfig.minimumIdle)
 
-    val transactor: Resource[F, HikariTransactor[F]] = {
-      for {
-        ce <- ExecutionContexts.fixedThreadPool[F](databaseConfig.threadPoolSize) // our connect EC
-        be <- ExecutionContexts.cachedThreadPool[F] // our blocking EC
-        xa <- HikariTransactor.fromHikariConfig[F](
-          hikariConfig,
-          connectEC = ce, // await connection here
-          Blocker.liftExecutionContext(be) // execute JDBC operations here
-        )
-      } yield xa
-    }
-    transactor
-  }
+    val transactor: Resource[Task, Transactor[Task]] = for {
+      connectEC <- ExecutionContexts.fixedThreadPool[Task](2)
+      transactEC <- ExecutionContexts.cachedThreadPool[Task]
+      xa <- HikariTransactor.fromHikariConfig[Task](
+        hikariConfig,
+        connectEC,
+        Blocker.liftExecutionContext(transactEC)
+      )
+    } yield xa
 
+    transactor.toManagedZIO
+  }
 }
 
 object Transaction {
-  def initialize[F[_] : Sync : Applicative](transactor: HikariTransactor[F]): Resource[F, F[Unit]] = {
-    Resource.eval(
-      Sync[F].delay {
-        transactor.configure {
-          dataSource => {
-            println("DATASOURCE")
-            val a: HikariDataSource = dataSource
-            println(dataSource.getDriverClassName)
-            println(dataSource.getJdbcUrl)
-            val f: FluentConfiguration = Flyway.configure().dataSource(dataSource)
-            val t = f.getDataSource
-            println(t)
-            println(t.getConnection)
-            val x: Flyway = f.load
-            val z: DataSource = x.getConfiguration.getDataSource
-            x.migrate()
-            Sync[F].delay(())
-          }
-        }
-      }
-    )
+  def migrate(dbTransactor: HikariTransactor[Task]): ZIO[Console, Throwable, Unit] = for {
+    _ <- putStrLn("Starting Flyway migration")
+    _ <- dbTransactor.configure(dataSource => loadFlyWayAndMigrate(dataSource))
+    _ <- putStrLn("Finished Flyway migration")
+  } yield ()
+
+  private def loadFlyWayAndMigrate(dataSource: HikariDataSource): Task[MigrateResult] =
+    ZIO.effect {
+      Flyway.configure()
+        .dataSource(dataSource)
+        .load()
+        .migrate()
   }
+
+//  def migrate(dbTransactor: HikariTransactor[Task]): ZIO[FlywayMigrator with Console, Throwable, Unit] =
+//    ZIO.accessM[FlywayMigrator with Console](_.flywayMigrator.migrate(dbTransactor))
 }

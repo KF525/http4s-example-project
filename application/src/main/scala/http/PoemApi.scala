@@ -1,19 +1,17 @@
 package http
 
-import cats.effect.Sync
-import cats.implicits._
-import controller.PoemController
-import org.http4s._
-import org.http4s.dsl.Http4sDsl
+import org.http4s.HttpRoutes
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
+import org.http4s.dsl.Http4sDsl
+import zio.Task
+import zio.interop.catz._
+import controller.PoemController
 
-class PoemApi[F[_]: Sync](poemController: PoemController[F]) {
+class PoemApi(poemController: PoemController) extends Http4sDsl[Task] {
 
-  val dsl: Http4sDsl[F] = new Http4sDsl[F] {}
-  import dsl._
-
-  val routes: HttpRoutes[F] = HttpRoutes.of {
-    case GET -> Root / "line" =>
+  val routes: HttpRoutes[Task] =
+    HttpRoutes.of {
+      case GET -> Root / "line" =>
       for {
         line <- poemController.getLine
         response <- Ok(line)

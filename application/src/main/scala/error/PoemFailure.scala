@@ -1,4 +1,4 @@
-package zio.error
+package error
 
 import org.http4s.{DecodeFailure, Status}
 

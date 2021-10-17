@@ -1,11 +1,10 @@
-package zio
-
 import cats.data.Kleisli
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.{HttpRoutes, Request, Response}
-import scala.concurrent.ExecutionContext
+import zio.{Runtime, Task}
 import zio.interop.catz.implicits._
 import zio.interop.catz._
+import scala.concurrent.ExecutionContext
 
 object ZioHttp4sBlaze {
 
@@ -24,5 +23,4 @@ object ZioHttp4sBlaze {
 
   private def buildHttpApp(routes: HttpRoutes[Task]) =
     Kleisli((a: Request[Task]) => routes.run(a).getOrElse(Response.notFound))
-
 }

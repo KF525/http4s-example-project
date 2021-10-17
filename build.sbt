@@ -11,7 +11,6 @@ lazy val doobieVersion          = "0.13.4"
 lazy val pureconfigVersion      = "0.15.0"
 lazy val zioVersion             = "1.0.12"
 lazy val zioInteropCatsVersion  = "2.1.4.0"
-lazy val monixVersion           = "3.3.0"
 
 // root is the parent and we don't package it. It aggregates other subprojects.
 lazy val root = project.in(file("."))
@@ -20,9 +19,6 @@ lazy val root = project.in(file("."))
 
 lazy val compound_poem_app = project.in(file("application"))
   .settings(
-//    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.0-M4"),
-//    addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.8"),
-    //scalacOptions ++= options,
     libraryDependencies ++= dependencies
   )
 
@@ -34,8 +30,6 @@ val dependencies = Seq(
   "org.http4s"              %% "http4s-blaze-client"     % http4sVersion,
   "org.http4s"              %% "http4s-circe"            % http4sVersion,
   "org.http4s"              %% "http4s-core"             % http4sVersion,
-  "io.monix"                %% "monix-catnap"            % monixVersion,
-  "io.monix"                %% "monix"                   % monixVersion,
   "org.typelevel"           %% "cats-effect"             % "2.2.0",
   "com.github.pureconfig"   %% "pureconfig"              % pureconfigVersion,
   "com.github.pureconfig"   %% "pureconfig-http4s"       % pureconfigVersion,
