@@ -8,10 +8,10 @@ object ZioTestSyntax {
     def unsafeRun: A = zio.Runtime.default.unsafeRun(z)
 
     def runFailure: E = {
-      val failedZio = z.either.flatMap {
-        case Left(err) => ZIO.succeed(err)
-        case Right(_) => ZIO.fail(new RuntimeException("Expected monix.error but didn't get one"))
-      }
+      val failedZio = z.foldM(
+        err => ZIO.succeed(err),
+        _ => ZIO.fail(new RuntimeException("Expected error but didn't get one"))
+      )
       zio.Runtime.default.unsafeRun(failedZio)
     }
   }

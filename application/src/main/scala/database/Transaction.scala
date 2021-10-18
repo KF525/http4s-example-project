@@ -20,7 +20,7 @@ import scala.concurrent.duration.DurationInt
 class Transaction {
 
   def createTransactor(databaseConfig: DatabaseConfig)
-                      (implicit rt: zio.Runtime[Blocking]): Managed[Throwable, Transactor[Task]] = {
+                      (implicit rt: zio.Runtime[Blocking]): Managed[Throwable, HikariTransactor[Task]] = {
     val hikariConfig = new HikariConfig()
     hikariConfig.setDriverClassName("org.postgresql.Driver")
     hikariConfig.setJdbcUrl(databaseConfig.url)
@@ -30,7 +30,7 @@ class Transaction {
     hikariConfig.setMaximumPoolSize(databaseConfig.maximumPoolSize)
     hikariConfig.setMinimumIdle(databaseConfig.minimumIdle)
 
-    val transactor: Resource[Task, Transactor[Task]] = for {
+    val transactor: Resource[Task, HikariTransactor[Task]] = for {
       connectEC <- ExecutionContexts.fixedThreadPool[Task](2)
       transactEC <- ExecutionContexts.cachedThreadPool[Task]
       xa <- HikariTransactor.fromHikariConfig[Task](
@@ -45,13 +45,13 @@ class Transaction {
 }
 
 object Transaction {
-  def migrate(dbTransactor: HikariTransactor[Task]): ZIO[Console, Throwable, Unit] = for {
-    _ <- putStrLn("Starting Flyway migration")
-    _ <- dbTransactor.configure(dataSource => loadFlyWayAndMigrate(dataSource))
-    _ <- putStrLn("Finished Flyway migration")
-  } yield ()
+//  def migrate(dbTransactor: HikariTransactor[Task]): ZIO[Console, Throwable, Unit] = for {
+//    _ <- putStrLn("Starting Flyway migration")
+//    _ <- dbTransactor.configure(dataSource => loadFlyWayAndMigrate(dataSource))
+//    _ <- putStrLn("Finished Flyway migration")
+//  } yield ()
 
-  private def loadFlyWayAndMigrate(dataSource: HikariDataSource): Task[MigrateResult] =
+  def loadFlyWayAndMigrate(dataSource: HikariDataSource): Task[MigrateResult] =
     ZIO.effect {
       Flyway.configure()
         .dataSource(dataSource)
