@@ -1,6 +1,6 @@
 package http
 
-import controller.{CompoundPoemController, PoemController}
+import controller.{CompoundPoemController, PromptController}
 import model.request.CompoundPoemRequest
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
@@ -14,9 +14,6 @@ import org.http4s.circe.CirceEntityDecoder.circeEntityDecoder
 
 class CompoundPoemApi(controller: CompoundPoemController) extends Http4sDsl[Task] {
 
-  /**
-   * curl -d '{"initialLine":"initial line", "initialAuthor":"author1", "inspiredLine":"inspired line", "inspiredAuthor":"author2" }' -X POST localhost:8027/compound
-   */
   val routes: HttpRoutes[Task] = HttpRoutes.of {
     case rawRequest@POST -> Root / "compound" =>
       for {

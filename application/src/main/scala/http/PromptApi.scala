@@ -5,15 +5,15 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import org.http4s.dsl.Http4sDsl
 import zio.Task
 import zio.interop.catz._
-import controller.PoemController
+import controller.PromptController
 
-class PoemApi(poemController: PoemController) extends Http4sDsl[Task] {
+class PromptApi(poemController: PromptController) extends Http4sDsl[Task] {
 
   val routes: HttpRoutes[Task] =
     HttpRoutes.of {
-      case GET -> Root / "line" =>
+      case GET -> Root / "poem" =>
       for {
-        line <- poemController.getLine
+        line <- poemController.getPrompt
         response <- Ok(line)
       } yield response
   }

@@ -1,10 +1,10 @@
 import cats.implicits.toSemigroupKOps
-import client.{Http4sClient, PoemClient}
+import client.{Http4sClient, PromptClient}
 import config.{DatabaseConfig, ServiceConfig}
-import controller.{CompoundPoemController, PoemController}
+import controller.{CompoundPoemController, PromptController}
 import database.Transaction
 import doobie.hikari.HikariTransactor
-import http.{CompoundPoemApi, PoemApi, Routes}
+import http.{CompoundPoemApi, PromptApi, Routes}
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.{HttpRoutes, Uri}
@@ -12,9 +12,9 @@ import store.CompoundPoemStore
 import zio.clock.Clock
 import zio.console.Console
 import zio.duration.durationInt
-import zio.interop.catz._
 import zio.interop.console.cats.putStrLn
 import zio.{ExitCode, Managed, Runtime, Task, URIO, ZEnv, ZIO}
+import zio.interop.catz._
 
 object Main extends zio.App {
 
@@ -53,12 +53,12 @@ object Main extends zio.App {
       console <- ZIO.environment[Console]
       _ <- transactor.configure(dataSource => Transaction.loadFlyWayAndMigrate(dataSource))
       http4sClient = new Http4sClient(client)
-      poemClient = new PoemClient(http4sClient, Uri.unsafeFromString("https://poetrydb.org/"),
+      poemClient = new PromptClient(http4sClient, Uri.unsafeFromString("https://poetrydb.org/"),
         config.retryAttempts, config.backoffIntervalMs.millis, config.timeoutPerAttemptMs.millis)
-      poemController = new PoemController(poemClient, clock, console)
+      poemController = new PromptController(poemClient, clock, console)
       compoundPoemStore = new CompoundPoemStore(transactor)
       compoundPoemController = new CompoundPoemController(compoundPoemStore)
-      routes: HttpRoutes[Task] = new Routes().routes <+> new PoemApi(poemController).routes <+> new CompoundPoemApi(compoundPoemController).routes
+      routes: HttpRoutes[Task] = new Routes().routes <+> new PromptApi(poemController).routes <+> new CompoundPoemApi(compoundPoemController).routes
       _ <- putStrLn("Starting Blaze Server")
       _ <- ZioHttp4sBlaze.runBlazeServer(routes, config.servicePort)
     } yield ()

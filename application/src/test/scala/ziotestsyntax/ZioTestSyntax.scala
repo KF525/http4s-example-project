@@ -1,5 +1,6 @@
-package zio.ziotestsyntax
+package ziotestsyntax
 
+import cats.data.NonEmptyList
 import org.mockito.stubbing.OngoingStubbing
 import zio.{Ref, ZEnv, ZIO}
 
@@ -26,20 +27,21 @@ object ZioTestSyntax {
     def thenSucceed(value: A): OngoingStubbing[ZIO[R, Nothing, A]] = stub thenReturn ZIO.effectTotal(value)
   }
 
-  def consecutively[R, E, A](ziosRef: Ref[List[ZIO[R, E, A]]]): ZIO[R, E, Option[A]] =
+  def consecutively[R, E, A](ziosRef: Ref[NonEmptyList[ZIO[R, E, A]]]) =
     for {
       zios <- ziosRef.get
       result <- zios match {
-        case Nil =>
-          ZIO.succeed(None)
-        case head :: remainder =>
+        case NonEmptyList(head, tail) =>
           for {
-            _ <- ziosRef.set(remainder)
+            _ <- tail match {
+              case Nil => ziosRef.set(NonEmptyList(head, tail))
+              case h :: t => ziosRef.set(NonEmptyList(h, t))
+            }
             r <- head
-          } yield Some(r)
+          } yield r
       }
     } yield result
-
+}
   //  it should "learn about zio schedule" in {
   //    trait NotifierTimeoutError
   //    case object GlobalTimeoutError extends NotifierTimeoutError
@@ -95,4 +97,3 @@ object ZioTestSyntax {
   //    //work.unsafeRun
   //  }
   //
-}

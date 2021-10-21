@@ -1,9 +1,11 @@
-import zio.ZIO
+import util.BaseSpec
 import zio.duration._
+import ziotestsyntax.ZioTestSyntax.ZioTestHelper
 
 class MainSpec extends BaseSpec {
 
+  //TODO: Fix this test
   "Main" should "start successfully" in {
-    zio.Runtime.default.unsafeRun(Main.run(List()).race(ZIO.unit.delay(10.seconds)))
+    Main.run(List()).timeout(5.seconds).unsafeRun should be (None)
   }
 }

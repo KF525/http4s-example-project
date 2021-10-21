@@ -1,9 +1,6 @@
-import sbt.Keys.scalacOptions
-
 // ThisBuild acts as a special subproject name that you can use to define default value for the build.
 ThisBuild / version      := "0.1"
 ThisBuild / scalaVersion := "2.13.5"
-
 
 lazy val http4sVersion          = "0.21.4"
 lazy val circeVersion           = "0.13.0"
@@ -17,6 +14,7 @@ lazy val root = project.in(file("."))
   .settings(name := "compound_poem")
   .aggregate(compound_poem_app)
 
+//TODO: Add organization structure?
 lazy val compound_poem_app = project.in(file("application"))
   .settings(
     libraryDependencies ++= dependencies
@@ -34,7 +32,6 @@ val dependencies = Seq(
   "com.github.pureconfig"   %% "pureconfig"              % pureconfigVersion,
   "com.github.pureconfig"   %% "pureconfig-http4s"       % pureconfigVersion,
   "com.github.pureconfig"   %% "pureconfig-cats"         % pureconfigVersion,
-//  "com.github.pureconfig"   %% "pureconfig-cats-effect"  % pureconfigVersion,
   "dev.zio"                 %% "zio"                     % zioVersion,
   "dev.zio"                 %% "zio-interop-cats"        % zioInteropCatsVersion,
   "org.tpolecat"            %% "doobie-core"             % doobieVersion,
@@ -42,6 +39,7 @@ val dependencies = Seq(
   "org.tpolecat"            %% "doobie-hikari"           % doobieVersion,
   "org.scalactic"           %% "scalactic"               % "3.2.7",
   "org.flywaydb"             % "flyway-core"             % "7.8.2",
+  "dev.zio"                 %% "zio-test"                % zioVersion % Test,
   "org.scalatestplus"       %% "mockito-3-4"             % "3.2.7.0" % Test,
   "org.scalatest"           %% "scalatest"               % "3.2.7" % Test,
   "org.mockito"             % "mockito-core"             % "2.7.19" % Test,

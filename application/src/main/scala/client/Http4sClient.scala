@@ -7,17 +7,17 @@ import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.dsl.impl.Statuses
 import org.http4s.{Request, Response, Uri}
-import error.PoemFailure
-import error.PoemFailure.{PoemBadResponseFailure, PoemGeneralFailure}
+import error.CompoundPoemFailure
+import error.CompoundPoemFailure.{PoemBadResponseFailure, PoemGeneralFailure}
 import zio.interop.catz._
 import zio.{IO, Task}
 
 class Http4sClient(httpClient: Client[Task]) extends Http4sClientDsl[Task] with Statuses {
-  def getRequest(baseUri: Uri): IO[PoemFailure, List[PoemResponse]] =
+  def getRequest(baseUri: Uri): IO[CompoundPoemFailure, List[PoemResponse]] =
     httpClient.expectOr[List[PoemResponse]](
       Request[Task](method = GET, uri = baseUri / "random" / "1")
     )(handleNon200).mapError{
-      case f: PoemFailure => f
+      case f: CompoundPoemFailure => f
       case e => PoemGeneralFailure(e.getMessage)
   }
 

@@ -1,7 +1,7 @@
 package store
 
 import doobie.hikari.HikariTransactor
-import doobie.{Transactor, Update0}
+import doobie.Update0
 import doobie.implicits._
 import doobie.util.query
 import model._
@@ -14,13 +14,12 @@ class CompoundPoemStore(transactor: HikariTransactor[Task]) {
     createQuery(compoundPoem).run.transact(transactor)
       .foldM(err => Task.fail(err), _ => Task.succeed(compoundPoem))
 
-
-//  def view: Task[List[CompoundPoem]] = {
-//    val plan = for {
-//      compoundPoems <-  showQuery.to[List]
-//    } yield compoundPoems
-//    plan.transact(transactor)
-//  }
+  def show: Task[List[CompoundPoem]] = {
+    val plan = for {
+      compoundPoems <- showQuery.to[List]
+    } yield compoundPoems
+    plan.transact(transactor)
+  }
 
   private def createQuery(compoundPoem: CompoundPoem): Update0 = {
     val CompoundPoem(FirstLine(
