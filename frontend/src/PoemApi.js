@@ -14,6 +14,16 @@ export async function savePoem(firstLine, secondLine, firstAuthor) {
   return await response.json()
 }
 
+export async function getPoems() {
+  const requestOptions = {
+    method: 'GET',
+    headers: {'Content-Type': 'application/json'},
+  }
+
+  const response = await fetch('/compound', requestOptions)
+  return await response.json()
+}
+
 export const fetchLine = async () => {
   try {
     const res = await fetch('/line')

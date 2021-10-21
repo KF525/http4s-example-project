@@ -2,6 +2,7 @@ import './App.css';
 import {Component} from "react";
 import {CompoundPoem} from "./CompoundPoem";
 import {PoemPrompt} from "./PoemPrompt";
+import {getPoems} from "./PoemApi";
 
 class App extends Component {
 
@@ -9,14 +10,16 @@ class App extends Component {
     super(props);
     this.state = {
       error: null,
-      savedLines: [],
+      savedPoems: [],
     };
   }
 
-  addCompoundPoem = (savedPoem) => {
-    this.setState((prevState) => {
-      return {savedLines: [...prevState.savedLines, savedPoem]}
-    })
+  componentDidMount = () => this.getCompoundPoems()
+
+  getCompoundPoems = async () => {
+    const savedPoems = await getPoems()
+    console.log(savedPoems)
+    this.setState( {savedPoems})
   }
 
   render() {
@@ -27,10 +30,10 @@ class App extends Component {
       return (
         <>
           <div>
-            {this.state.savedLines.map((poem, i) => <CompoundPoem key={i} poem={poem}/>)}
+            {this.state.savedPoems.map((poem, i) => <CompoundPoem key={i} poem={poem}/>)}
           </div>
           <hr/>
-          <PoemPrompt addCompoundPoem={this.addCompoundPoem}/>
+          <PoemPrompt/>
         </>
       );
     }

@@ -24,16 +24,13 @@ export class PoemPrompt extends Component {
     }
   }
 
-  //arrow functions automatically get this bound
+  //arrow functions automatically get "this" bound
   doSaveAndUpdate = async () => {
     this.setState({saving: true})
     const {firstAuthor, secondLine, firstLine} = this.state;
-    const savedPoem = await savePoem(firstLine, secondLine, firstAuthor)
+    await savePoem(firstLine, secondLine, firstAuthor)
     await this.getPrompt()
-    this.props.addCompoundPoem(savedPoem)
-    this.setState(() => {
-      return {saving: false, secondLine: ""}
-    })
+    this.setState({saving: false, secondLine: ""})
   };
 
   render() {
