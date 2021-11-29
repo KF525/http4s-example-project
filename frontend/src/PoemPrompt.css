@@ -1,0 +1,14 @@
+
+.PoemPrompt {
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid;
+    position: fixed;
+    bottom: 0;
+    background: antiquewhite;
+    right: 0;
+}
+
+.PoemPrompt .line {
+    margin-bottom: 10px;
+}

@@ -1,5 +1,6 @@
 import {Component} from "react";
 import {fetchLine, savePoem} from "./PoemApi";
+import './PoemPrompt.css';
 
 export class PoemPrompt extends Component {
 
@@ -31,15 +32,16 @@ export class PoemPrompt extends Component {
     await savePoem(firstLine, secondLine, firstAuthor)
     await this.getPrompt()
     this.setState({saving: false, secondLine: ""})
+    await this.props.getCompoundPoems()
   };
 
   render() {
     if (this.state.promptLoading || this.state.saving) {
       return <div>Getting a prompt....</div>
     } else {
-      return <div>
-        <div><strong>Line:</strong>{this.state.firstLine}</div>
-        <input
+      return <div className="PoemPrompt">
+        <div className="line"><strong>Line:</strong>{this.state.firstLine}</div>
+        <input className="input"
           type="text"
           name="secondLine"
           placeholder="Write "

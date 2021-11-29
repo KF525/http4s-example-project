@@ -33,7 +33,7 @@ class App extends Component {
             {this.state.savedPoems.map((poem, i) => <CompoundPoem key={i} poem={poem}/>)}
           </div>
           <hr/>
-          <PoemPrompt/>
+          <PoemPrompt getCompoundPoems={ this.getCompoundPoems }/>
         </>
       );
     }
