@@ -12,7 +12,7 @@ import error.CompoundPoemFailure.{PoemBadResponseFailure, PoemGeneralFailure}
 import zio.interop.catz._
 import zio.{IO, Task}
 
-class Http4sClient(httpClient: Client[Task]) extends Http4sClientDsl[Task] with Statuses {
+case class Http4sThinClient(httpClient: Client[Task]) extends Http4sClientDsl[Task] with Statuses {
   def getRequest(baseUri: Uri): IO[CompoundPoemFailure, List[PoemResponse]] =
     httpClient.expectOr[List[PoemResponse]](
       Request[Task](method = GET, uri = baseUri / "random" / "1")

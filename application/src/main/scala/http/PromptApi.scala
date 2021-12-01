@@ -7,7 +7,7 @@ import zio.Task
 import zio.interop.catz._
 import controller.PromptController
 
-class PromptApi(poemController: PromptController) extends Http4sDsl[Task] {
+case class PromptApi(poemController: PromptController) extends Http4sDsl[Task] {
 
   val routes: HttpRoutes[Task] =
     HttpRoutes.of {

@@ -15,7 +15,7 @@ import zio.interop.catz._
 import zio.interop.console.cats.putStrLn
 import zio.{Schedule, Task, ZIO}
 
-class PromptClient(client: Http4sClient,
+class PromptClient(client: Http4sThinClient,
                    baseUri: Uri,
                    retryAttempts: Int,
                    backoffInterval: Duration,

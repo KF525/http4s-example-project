@@ -1,5 +1,5 @@
 import cats.implicits.toSemigroupKOps
-import client.{Http4sClient, PromptClient}
+import client.{Http4sThinClient, PromptClient}
 import config.{DatabaseConfig, ServiceConfig}
 import controller.{CompoundPoemController, PromptController}
 import database.Transaction
@@ -52,13 +52,12 @@ object Main extends zio.App {
       clock <- ZIO.environment[Clock]
       console <- ZIO.environment[Console]
       _ <- transactor.configure(dataSource => Transaction.loadFlyWayAndMigrate(dataSource))
-      http4sClient = new Http4sClient(client)
-      poemClient = new PromptClient(http4sClient, Uri.unsafeFromString("https://poetrydb.org/"),
+      poemClient = new PromptClient(Http4sThinClient(client), Uri.unsafeFromString("https://poetrydb.org/"),
         config.retryAttempts, config.backoffIntervalMs.millis, config.timeoutPerAttemptMs.millis)
       poemController = new PromptController(poemClient, clock, console)
       compoundPoemStore = new CompoundPoemStore(transactor)
       compoundPoemController = new CompoundPoemController(compoundPoemStore)
-      routes: HttpRoutes[Task] = new Routes().routes <+> new PromptApi(poemController).routes <+> new CompoundPoemApi(compoundPoemController).routes
+      routes: HttpRoutes[Task] = Routes().routes <+> PromptApi(poemController).routes <+> CompoundPoemApi(compoundPoemController).routes
       _ <- putStrLn("Starting Blaze Server")
       _ <- ZioHttp4sBlaze.runBlazeServer(routes, config.servicePort)
     } yield ()

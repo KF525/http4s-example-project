@@ -9,7 +9,7 @@ import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import zio.interop.catz._
 import org.http4s.circe.CirceEntityDecoder.circeEntityDecoder
 
-class CompoundPoemApi(controller: CompoundPoemController) extends Http4sDsl[Task] {
+case class CompoundPoemApi(controller: CompoundPoemController) extends Http4sDsl[Task] {
 
   val routes: HttpRoutes[Task] = HttpRoutes.of {
     case rawRequest@POST -> Root / "compound" =>

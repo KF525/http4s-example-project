@@ -16,8 +16,7 @@ class PromptController(client: PromptClient, clock: Clock, console: Console) {
     line <- client.makeRequest.provide(clock ++ console).map(_.headOption).flatMap {
       case Some(p) =>
         val poem: Poem = Poem.createPoem(p)
-        val lines: List[Line] = poem.lines.filter(l => !l.text.isEmpty)
-        val line: Line = lines.apply(Random.nextInt(lines.size))
+        val line: Line = poem.lines.apply(Random.nextInt(poem.lines.size))
         ZIO.succeed(PromptResponse(poem, line))
       case None =>
         ZIO.fail(NoPoemError)

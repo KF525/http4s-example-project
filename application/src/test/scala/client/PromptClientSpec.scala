@@ -2,7 +2,7 @@ package client
 
 import util.BaseSpec
 import cats.data.NonEmptyList
-import error.CompoundPoemFailure.PoemBadResponseFailure
+import error.CompoundPoemFailure.{PoemBadResponseFailure, PoemTimedOutWithoutResponseFailure}
 import model.reponse.PoemResponse
 import org.http4s.circe.jsonEncoderOf
 import org.http4s.dsl.Http4sDsl
@@ -10,30 +10,34 @@ import org.http4s._
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar.mock
 import zio._
+import zio.clock.Clock
 import zio.duration.durationInt
 import ziotestsyntax.ZioTestSyntax.{OngoingZioStubbingHelper, ZioTestHelper, consecutively}
 
 class PromptClientSpec extends BaseSpec with Http4sDsl[Task] {
+
+  behavior of "PromptClient"
+
   implicit val encoder: EntityEncoder[Task, List[PoemResponse]] = jsonEncoderOf[Task, List[PoemResponse]]
 
-  val poem = List(PoemResponse("Emily Dickinson", "I hide myself within my flower,",
+  val poem = List(PoemResponse("I hide myself within my flower,", "Emily Dickinson",
     List("I hide myself within my flower,", "That fading from your Vase,", "You, unsuspecting, feel for me --",
       "Almost a loneliness."), 4))
 
-  "makeRequest" should "" in {
+  it should "respond successfully" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
-    val expectedUri = Uri.unsafeFromString("https://www.poem.com/random/1")
-    val mockHttp4sClient = mock[Http4sClient]
+    val mockHttp4sClient = mock[Http4sThinClient]
 
     when(mockHttp4sClient.getRequest(baseUri)).thenSucceed(poem)
-    val client = new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
+    val client =  new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
 
-    client.makeRequest.unsafeRun
+    val poemResponse: PoemResponse = client.makeRequest.unsafeRun.head
+    poemResponse should be(poem.head)
   }
 
   it should "retry non-client errors" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
-    val mockHttp4sClient = mock[Http4sClient]
+    val mockHttp4sClient = mock[Http4sThinClient]
 
     val expectedFailure = PoemBadResponseFailure("Not ok", Status.InternalServerError)
     val expectedResponses = for {
@@ -52,36 +56,41 @@ class PromptClientSpec extends BaseSpec with Http4sDsl[Task] {
 
   it should "handle errors when attempts exhausted" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
-    val mockHttp4sClient = mock[Http4sClient]
+    val mockHttp4sClient = mock[Http4sThinClient]
 
     val expectedFailure = PoemBadResponseFailure("Not ok", Status.InternalServerError)
     when(mockHttp4sClient.getRequest(baseUri)).thenFail(expectedFailure)
 
     val client = new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
 
-    client.makeRequest.runFailure should be (expectedFailure)
+    client.makeRequest.runFailure should be(expectedFailure)
   }
 
   it should "not retry on client errors" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
-    val mockHttp4sClient = mock[Http4sClient]
+    val mockHttp4sClient = mock[Http4sThinClient]
 
     val expectedFailure = PoemBadResponseFailure("Not ok", Status.BadRequest)
-    val expectedResponses = for {
-      refConsecutiveResponses <- Ref.make(NonEmptyList.of(
-        ZIO.fail(expectedFailure),
-        ZIO.succeed(List())
-      ))
-      consecutiveResponses = consecutively(refConsecutiveResponses)
-      _ = when(mockHttp4sClient.getRequest(baseUri)).thenReturn(consecutiveResponses)
-      client = new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
-      _ <- client.makeRequest
-    } yield ()
+    when(mockHttp4sClient.getRequest(baseUri)).thenFail(expectedFailure)
 
-    expectedResponses.runFailure should be (expectedFailure)
+    val client = new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
+    val failure = client.makeRequest.runFailure
+    failure should be(expectedFailure)
   }
 
   it should "handle errors when all attempts timeout" in {
+    val baseUri = Uri.unsafeFromString("https://www.poem.com")
+    val mockHttp4sClient = mock[Http4sThinClient]
 
+    val test = for {
+      clock <- ZIO.environment[Clock]
+      delayedResponse = ZIO.succeed(poem).delay(100.millis).provide(clock)
+      _ = when(mockHttp4sClient.getRequest(baseUri)).thenReturn(delayedResponse)
+      client = new PromptClient(mockHttp4sClient, baseUri, 0, 0.second, 10.millis)
+      result <- client.makeRequest
+    } yield result
+
+    val failure = test.runFailure
+    failure should be(PoemTimedOutWithoutResponseFailure)
   }
 }
