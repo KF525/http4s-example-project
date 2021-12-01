@@ -8,6 +8,7 @@ lazy val doobieVersion          = "0.13.4"
 lazy val pureconfigVersion      = "0.15.0"
 lazy val zioVersion             = "1.0.12"
 lazy val zioInteropCatsVersion  = "2.1.4.0"
+lazy val catsEffectVersion      = "2.2.0"
 
 // root is the parent and we don't package it. It aggregates other subprojects.
 lazy val root = project.in(file("."))
@@ -28,7 +29,7 @@ val dependencies = Seq(
   "org.http4s"              %% "http4s-blaze-client"     % http4sVersion,
   "org.http4s"              %% "http4s-circe"            % http4sVersion,
   "org.http4s"              %% "http4s-core"             % http4sVersion,
-  "org.typelevel"           %% "cats-effect"             % "2.2.0",
+  "org.typelevel"           %% "cats-effect"             % catsEffectVersion,
   "com.github.pureconfig"   %% "pureconfig"              % pureconfigVersion,
   "com.github.pureconfig"   %% "pureconfig-http4s"       % pureconfigVersion,
   "com.github.pureconfig"   %% "pureconfig-cats"         % pureconfigVersion,

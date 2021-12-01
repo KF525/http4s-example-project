@@ -17,6 +17,5 @@ class CompoundPoemController(compoundPoemStore: CompoundPoemStore) {
     compoundPoemStore.create(compoundPoem)
   }
 
-  //def view: Task[List[CompoundPoem]] = compoundPoemStore.show
-
+  def view: Task[List[CompoundPoem]] = compoundPoemStore.view
 }

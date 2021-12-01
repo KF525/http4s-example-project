@@ -14,7 +14,7 @@ class CompoundPoemStore(transactor: HikariTransactor[Task]) {
     createQuery(compoundPoem).run.transact(transactor)
       .foldM(err => Task.fail(err), _ => Task.succeed(compoundPoem))
 
-  def show: Task[List[CompoundPoem]] = {
+  def view: Task[List[CompoundPoem]] = {
     val plan = for {
       compoundPoems <- showQuery.to[List]
     } yield compoundPoems
