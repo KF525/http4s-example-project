@@ -8,7 +8,9 @@ import zio.Task
 class CompoundPoemController(compoundPoemStore: CompoundPoemStore) {
 
   def save(request: CompoundPoemRequest): Task[CompoundPoem] = {
+    val title = request.title.getOrElse("Untitled")
     val compoundPoem = CompoundPoem(
+      title,
       FirstLine(Author(request.firstAuthor), Line(request.firstLine)),
       SecondLine(Author(request.secondAuthor), Line(request.secondLine))
     )

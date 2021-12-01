@@ -22,18 +22,18 @@ class CompoundPoemStore(transactor: HikariTransactor[Task]) {
   }
 
   private def createQuery(compoundPoem: CompoundPoem): Update0 = {
-    val CompoundPoem(FirstLine(
+    val CompoundPoem(compoundPoem.title, FirstLine(
     Author(compoundPoem.firstLine.author.name),
     Line(compoundPoem.firstLine.line.text)),
     SecondLine(
     Author(compoundPoem.secondLine.author.name),
     Line(compoundPoem.secondLine.line.text))) = compoundPoem
-    sql"insert into compound_poem (first_line, second_line, first_author, second_author) values (${compoundPoem.firstLine.line.text}, ${compoundPoem.secondLine.line.text}, ${compoundPoem.firstLine.author.name}, ${compoundPoem.secondLine.author.name})".update
+    sql"insert into compound_poem (title, first_line, second_line, first_author, second_author) values (${compoundPoem.title}, ${compoundPoem.firstLine.line.text}, ${compoundPoem.secondLine.line.text}, ${compoundPoem.firstLine.author.name}, ${compoundPoem.secondLine.author.name})".update
   }
 
   private def showQuery: query.Query0[CompoundPoem] = {
-    val q = sql"select first_line, second_line, first_author, second_author from compound_poem"
-    q.query[(String, String, String, String)].map { case (firstLine, secondLine, firstAuthor, secondAuthor) =>
-      CompoundPoem(FirstLine(Author(firstAuthor), Line(firstLine)), SecondLine(Author(secondAuthor), Line(secondLine)))}
+    val q = sql"select title, first_line, second_line, first_author, second_author from compound_poem"
+    q.query[(String,String, String, String, String)].map { case (title, firstLine, secondLine, firstAuthor, secondAuthor) =>
+      CompoundPoem(title, FirstLine(Author(firstAuthor), Line(firstLine)), SecondLine(Author(secondAuthor), Line(secondLine)))}
   }
 }

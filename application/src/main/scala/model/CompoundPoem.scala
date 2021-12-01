@@ -4,7 +4,7 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import model.request.CompoundPoemRequest
 
-case class CompoundPoem(firstLine: FirstLine, secondLine: SecondLine)
+case class CompoundPoem(title: String, firstLine: FirstLine, secondLine: SecondLine)
 
 object CompoundPoem {
 //  def createFromResponse(response: CompoundPoemRequest): CompoundPoem = {

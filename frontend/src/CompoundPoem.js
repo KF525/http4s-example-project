@@ -1,5 +1,7 @@
-export const CompoundPoem = ({poem: {firstLine, secondLine}}) =>
+export const CompoundPoem = ({poem: {title, firstLine, secondLine}}) =>
   <div>
+    {title}
+    <br/>
     {firstLine.line.text}
     <br/>
     {secondLine.line.text}
