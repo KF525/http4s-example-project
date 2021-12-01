@@ -11,7 +11,7 @@ class PromptApi(poemController: PromptController) extends Http4sDsl[Task] {
 
   val routes: HttpRoutes[Task] =
     HttpRoutes.of {
-      case GET -> Root / "poem" =>
+      case GET -> Root / "prompt" =>
       for {
         line <- poemController.getPrompt
         response <- Ok(line)

@@ -16,7 +16,7 @@ export class PoemPrompt extends Component {
   componentDidMount = () => this.getPrompt()
 
   getPrompt = () =>
-    fetch('/line')
+    fetch('/prompt')
       .then(res => res.json())
       .then(
         (result) => {
