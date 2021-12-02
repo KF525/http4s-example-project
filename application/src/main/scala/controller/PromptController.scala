@@ -4,7 +4,7 @@ import model.{Line, Poem}
 import model.reponse.PromptResponse
 import client.PromptClient
 import zio.clock.Clock
-import zio.console.{Console, putStrLn}
+import zio.console.Console
 import error.CompoundPoemFailure.NoPoemError
 import zio.{Task, ZIO}
 
@@ -12,6 +12,7 @@ import scala.util.Random
 
 class PromptController(client: PromptClient, clock: Clock, console: Console) {
 
+  //TODO: Looks like I am dropping the error that may come back from makeRequest
   def getPrompt: Task[PromptResponse] = for {
     line <- client.makeRequest.provide(clock ++ console).map(_.headOption).flatMap {
       case Some(p) =>

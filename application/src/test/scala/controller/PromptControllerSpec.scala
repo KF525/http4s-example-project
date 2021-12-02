@@ -4,7 +4,7 @@ import util.BaseSpec
 
 class PromptControllerSpec extends BaseSpec {
 
-  "save" should "" in {
+  "getPrompt" should "" in {
 
   }
 
