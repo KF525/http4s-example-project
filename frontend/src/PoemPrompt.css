@@ -5,16 +5,21 @@
     border: 1px solid;
     position: fixed;
     bottom: 0;
-    background: antiquewhite;
+    background: white;
     right: 0;
 }
 
 .PoemPrompt .header {
-
+    padding-bottom: 30px;
+    font-size: 30px;
 }
 
 .PoemPrompt .line {
     margin-bottom: 10px;
+}
+
+.PoemPrompt .asterisk {
+    color: darkgray;
 }
 
 .PoemPrompt .input {
@@ -58,6 +63,7 @@
 .PoemPrompt .source {
     padding-top: 25px;
     font-size: 10px;
+    color: darkgray;
 }
 
 .PoemPrompt .title {

@@ -42,7 +42,7 @@ export class PoemPrompt extends Component {
     } else {
       return <div className="PoemPrompt">
         <div className="header">Create Compound Poem</div>
-        <div className="line">{this.state.firstLine}*</div>
+        <div className="line">{this.state.firstLine}<span className="asterisk">*</span></div>
         <input className="input"
           type="text"
           name="secondLine"
@@ -52,7 +52,7 @@ export class PoemPrompt extends Component {
         />
         <div className="buttons">
           <button className="savePoem" onClick={this.doSaveAndUpdate}>Save Poem</button>
-          <button className="newPrompt" onClick={this.doSaveAndUpdate}>New Prompt</button>
+          <button className="newPrompt" onClick={this.getPrompt}>New Prompt</button>
         </div>
         <div className="source">*From {this.state.firstAuthor}'s <span className="title">Placeholder Title</span></div>
       </div>
