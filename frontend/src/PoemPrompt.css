@@ -9,6 +9,59 @@
     right: 0;
 }
 
+.PoemPrompt .header {
+
+}
+
 .PoemPrompt .line {
     margin-bottom: 10px;
 }
+
+.PoemPrompt .input {
+    padding-top: 10px;
+    padding-bottom: 40px;
+    padding-right: 50px;
+}
+
+.PoemPrompt .input:focus {
+    outline: none;
+}
+
+.PoemPrompt .buttons {
+    padding-top: 10px;
+}
+
+.PoemPrompt .buttons button {
+    padding: 5px 40px;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.PoemPrompt .buttons button:hover {
+    background: #cdff05;
+    color: black;
+}
+
+.PoemPrompt .buttons .savePoem {
+    background: black;
+    color: white;
+    border: black;
+}
+
+.PoemPrompt .buttons .newPrompt {
+    background: darkgray;
+    color: lightgray;
+    border: darkgray;
+    padding: 5px 8px;
+}
+
+.PoemPrompt .source {
+    padding-top: 25px;
+    font-size: 10px;
+}
+
+.PoemPrompt .title {
+    font-style: italic;
+}
+
+

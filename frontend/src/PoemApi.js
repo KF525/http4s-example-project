@@ -30,7 +30,8 @@ export const fetchLine = async () => {
     const result = await res.json()
     return {
       firstLine: result.line.text,
-      firstAuthor: result.poem.author.name
+      firstAuthor: result.poem.author.name,
+      promptTitle: result.poem.title //TODO: add title
     }
   } catch (error) {
     return {error: true}

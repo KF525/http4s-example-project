@@ -11,6 +11,7 @@ export class PoemPrompt extends Component {
       promptLoading: true,
       firstLine: null,
       firstAuthor: null,
+      promptTitle: null,
       secondLine: ""
     };
   }
@@ -19,9 +20,9 @@ export class PoemPrompt extends Component {
 
   getPrompt = async () => {
     this.setState({promptLoading: true})
-    const {error, firstLine, firstAuthor} = await fetchLine()
+    const {error, firstLine, firstAuthor, promptTitle} = await fetchLine()
     if (!error) {
-      this.setState({promptLoading: false, firstLine, firstAuthor})
+      this.setState({promptLoading: false, firstLine, firstAuthor, promptTitle})
     }
   }
 
@@ -40,15 +41,20 @@ export class PoemPrompt extends Component {
       return <div>Getting a prompt....</div>
     } else {
       return <div className="PoemPrompt">
-        <div className="line"><strong>Line:</strong>{this.state.firstLine}</div>
+        <div className="header">Create Compound Poem</div>
+        <div className="line">{this.state.firstLine}*</div>
         <input className="input"
           type="text"
           name="secondLine"
-          placeholder="Write "
+          placeholder="WRITE YOUR LINE"
           value={this.state.secondLine}
           onChange={(event) => this.setState({secondLine: event.target.value})}
         />
-        <button onClick={this.doSaveAndUpdate}>Save</button>
+        <div className="buttons">
+          <button className="savePoem" onClick={this.doSaveAndUpdate}>Save Poem</button>
+          <button className="newPrompt" onClick={this.doSaveAndUpdate}>New Prompt</button>
+        </div>
+        <div className="source">*From {this.state.firstAuthor}'s <span className="title">Placeholder Title</span></div>
       </div>
     }
   }
