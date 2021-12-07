@@ -1,43 +1,42 @@
-import './App.css';
-import {Component} from "react";
-import {CompoundPoem} from "./CompoundPoem";
-import {PoemPrompt} from "./PoemPrompt";
-import {getPoems} from "./PoemApi";
+import Read from "./Read";
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
+import {Create} from "./Create";
 
-class App extends Component {
+const About = () => <div>About</div>
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      error: null,
-      savedPoems: [],
-    };
-  }
+function App() {
+  return (
+    <Router>
+      <div>
+        <ul>
+          <li>
+            <Link to="/">Home</Link>
+          </li>
+          <li>
+            <Link to="/about">About</Link>
+          </li>
+          <li>
+            <Link to="/read">Read</Link>
+          </li>
+          <li>
+            <Link to="/create">Create</Link>
+          </li>
+        </ul>
 
-  componentDidMount = () => this.getCompoundPoems()
-
-  getCompoundPoems = async () => {
-    const savedPoems = await getPoems()
-    console.log(savedPoems)
-    this.setState( {savedPoems})
-  }
-
-  render() {
-    const {error} = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else {
-      return (
-        <>
-          <div>
-            {this.state.savedPoems.map((poem, i) => <CompoundPoem key={i} poem={poem}/>)}
-          </div>
-          <hr/>
-          <PoemPrompt getCompoundPoems={ this.getCompoundPoems }/>
-        </>
-      );
-    }
-  }
+        <Routes>
+          <Route path="/about" element={<About/>}/>
+          <Route path="/read" element={<Read/>}/>
+          <Route path="/create" element={<Create/>}/>
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
 export default App;

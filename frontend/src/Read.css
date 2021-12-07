@@ -1,0 +1,9 @@
+.CompoundPoem {
+    border: 1px salmon solid;
+    padding: 5px;
+    margin: 10px;
+}
+
+.CompoundPoem .author {
+    color: darkgray;
+}

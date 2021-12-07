@@ -2,24 +2,21 @@
 .PoemPrompt {
     padding: 10px;
     margin: 10px;
-    border: 1px solid;
-    position: fixed;
-    bottom: 0;
     background: white;
-    right: 0;
+    color: #2a2a2a;
 }
 
 .PoemPrompt .header {
-    padding-bottom: 30px;
     font-size: 30px;
 }
 
 .PoemPrompt .line {
+    padding-top: 50px;
     margin-bottom: 10px;
 }
 
 .PoemPrompt .asterisk {
-    color: darkgray;
+    color: #646262;
 }
 
 .PoemPrompt .input {
@@ -44,13 +41,13 @@
 
 .PoemPrompt .buttons button:hover {
     background: #cdff05;
-    color: black;
+    color: #2a2a2a;
 }
 
 .PoemPrompt .buttons .savePoem {
-    background: black;
+    background: #2a2a2a;
     color: white;
-    border: black;
+    border: #2a2a2a;
 }
 
 .PoemPrompt .buttons .newPrompt {
@@ -63,7 +60,7 @@
 .PoemPrompt .source {
     padding-top: 25px;
     font-size: 10px;
-    color: darkgray;
+    color: #646262;
 }
 
 .PoemPrompt .title {

@@ -1,8 +1,8 @@
 import {Component} from "react";
 import {fetchLine, savePoem} from "./PoemApi";
-import './PoemPrompt.css';
+import './Create.css';
 
-export class PoemPrompt extends Component {
+export class Create extends Component {
 
   constructor(props) {
     super(props);
@@ -26,14 +26,12 @@ export class PoemPrompt extends Component {
     }
   }
 
-  //arrow functions automatically get "this" bound
   doSaveAndUpdate = async () => {
     this.setState({saving: true})
     const {firstAuthor, secondLine, firstLine} = this.state;
     await savePoem(firstLine, secondLine, firstAuthor)
     await this.getPrompt()
     this.setState({saving: false, secondLine: ""})
-    await this.props.getCompoundPoems()
   };
 
   render() {
