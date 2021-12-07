@@ -7,16 +7,19 @@ import {
   Link
 } from "react-router-dom";
 import {Create} from "./Create";
+import './App.css';
 
 const About = () => <div>About</div>
 
 function App() {
   return (
     <Router>
-      <div>
+      <div className="Navigation">
         <ul>
           <li>
-            <Link to="/">Home</Link>
+            <Link to="/">
+              <img src="https://play-lh.googleusercontent.com/0_ixZOlXHE0DLR207sHfk-tX-XbkyiBqafbVqenrhlYCBmbDdzSSrsecjtuzJPcDgVl-nYO9kZYLM-o=s400" alt='Compound Poem' />
+            </Link>
           </li>
           <li>
             <Link to="/about">About</Link>

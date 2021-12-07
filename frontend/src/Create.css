@@ -22,7 +22,7 @@
 .PoemPrompt .input {
     padding-top: 10px;
     padding-bottom: 40px;
-    padding-right: 50px;
+    padding-right: 100px;
 }
 
 .PoemPrompt .input:focus {
