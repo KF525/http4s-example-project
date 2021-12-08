@@ -5,7 +5,7 @@ import pureconfig._
 import pureconfig.generic.auto._
 import scala.concurrent.duration.Duration
 
-case class ServiceConfig(serviceHost: String,
+case class GeneralConfig(serviceHost: String,
                          servicePort: Int,
                          connectTimeout: Duration,
                          requestTimeout: Duration,
@@ -13,8 +13,8 @@ case class ServiceConfig(serviceHost: String,
                          backoffIntervalMs: Int,
                          timeoutPerAttemptMs: Int)
 
-object ServiceConfig {
-  implicitly[ConfigReader[ServiceConfig]]
+object GeneralConfig {
+  implicitly[ConfigReader[GeneralConfig]]
 
-  def load(): Result[ServiceConfig] = ConfigSource.default.load[ServiceConfig]
+  def load(): Result[GeneralConfig] = ConfigSource.default.load[GeneralConfig]
 }

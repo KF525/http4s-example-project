@@ -1,6 +1,6 @@
 import cats.implicits.toSemigroupKOps
 import client.{Http4sThinClient, PromptClient}
-import config.{DatabaseConfig, ServiceConfig}
+import config.{DatabaseConfig, GeneralConfig, Http4sServerConfig}
 import controller.{CompoundPoemController, PromptController}
 import database.Transaction
 import doobie.hikari.HikariTransactor
@@ -15,8 +15,11 @@ import zio.duration.durationInt
 import zio.interop.console.cats.putStrLn
 import zio.{ExitCode, Managed, Runtime, Task, URIO, ZEnv, ZIO}
 import zio.interop.catz._
+import com.typesafe.scalalogging.StrictLogging
+import ziohelpers.ZioHttp4sBlazeServer
+import ziohelpers.ZioLoggerSyntax._
 
-object Main extends zio.App {
+object Main extends zio.App with StrictLogging {
 
   override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] = startupApp.orDie.exitCode
 
@@ -24,9 +27,9 @@ object Main extends zio.App {
 
   val startupApp: ZIO[Clock with Console, Throwable, Unit] =
     for {
-      _ <- putStrLn("ZIO app starting")
-      _ <- putStrLn("Loading Application Config")
-      serviceConfig <- Task.effectTotal(ServiceConfig.load().getOrElse(throw new RuntimeException("Failed to load service config")))
+      _ <- logger.infoZ("ZIO app starting")
+      _ <- logger.infoZ("Loading Application Config")
+      serviceConfig <- Task.effectTotal(GeneralConfig.load().getOrElse(throw new RuntimeException("Failed to load service config")))
       databaseConfig <- Task.effectTotal(DatabaseConfig.load().getOrElse(throw new RuntimeException("Failed to load monix.database config")))
       transactor: Managed[Throwable, HikariTransactor[Task]] = new Transaction().createTransactor(databaseConfig)
       httpClientResource: Managed[Throwable, Client[Task]] = BlazeClientBuilder[Task](runtime.platform.executor.asEC)
@@ -47,7 +50,7 @@ object Main extends zio.App {
 
   private def buildServer(transactor: HikariTransactor[Task],
                           client: Client[Task],
-                          config: ServiceConfig): ZIO[Clock with Console, Throwable, Unit] = {
+                          config: GeneralConfig): ZIO[Clock with Console, Throwable, Unit] = {
     for {
       clock <- ZIO.environment[Clock]
       console <- ZIO.environment[Console]
@@ -59,7 +62,7 @@ object Main extends zio.App {
       compoundPoemController = new CompoundPoemController(compoundPoemStore)
       routes: HttpRoutes[Task] = Routes().routes <+> PromptApi(poemController).routes <+> CompoundPoemApi(compoundPoemController).routes
       _ <- putStrLn("Starting Blaze Server")
-      _ <- ZioHttp4sBlaze.runBlazeServer(routes, config.servicePort)
+      _ <- ZioHttp4sBlaze.runBlazeServer(routes, config.servicePort) //ZioHttp4sBlazeServer(routes, Http4sServerConfig(config.servicePort)).runBlazeServer
     } yield ()
   }
 }

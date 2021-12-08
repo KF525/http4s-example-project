@@ -1,6 +1,7 @@
-package zio
+package ziohelpers
 
 import com.typesafe.scalalogging.Logger
+import zio.{UIO, ZIO}
 
 object ZioLoggerSyntax {
   implicit class LoggerSyntaxExtension(logger: Logger) {
