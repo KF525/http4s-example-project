@@ -16,9 +16,6 @@ import scala.concurrent.ExecutionContext
 
 case class ZioHttp4sBlazeServer(routes: HttpRoutes[Task], config: Http4sServerConfig) {
   def runBlazeServer = {
-    import org.http4s.HttpRoutes
-
-    def runBlazeServer: Task[Unit] = {
       val app = buildHttpApp(routes)
 
       implicit val runtime: Runtime[Any] = Runtime.default
@@ -33,7 +30,6 @@ case class ZioHttp4sBlazeServer(routes: HttpRoutes[Task], config: Http4sServerCo
 
     def buildHttpApp(routes: HttpRoutes[Task]) =
       Kleisli((a: Request[Task]) => routes.run(a).getOrElse(Response.notFound))
-  }
 }
 
 object ZioHttp4sBlazeServer {
