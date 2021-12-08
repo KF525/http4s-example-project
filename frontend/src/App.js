@@ -4,7 +4,8 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link
+  Link,
+  NavLink
 } from "react-router-dom";
 import {Create} from "./Create";
 import './App.css';
@@ -17,18 +18,23 @@ function App() {
       <div className="Navigation">
         <ul>
           <li>
-            <Link to="/">
+            <NavLink to="/">
               <img src="https://play-lh.googleusercontent.com/0_ixZOlXHE0DLR207sHfk-tX-XbkyiBqafbVqenrhlYCBmbDdzSSrsecjtuzJPcDgVl-nYO9kZYLM-o=s400" alt='Compound Poem' />
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/about">About</Link>
+            <NavLink
+              to="About"
+              style={({ isActive }) => ({
+              color: isActive ? '#fff' : '#545e6f',
+              background: isActive ? '#7600dc' : '#f0f0f0',
+              })}>About</NavLink>
           </li>
           <li>
-            <Link to="/read">Read</Link>
+            <NavLink to="/read" style={({isActive}) => ( {color: "red"}) }>Read</NavLink>
           </li>
           <li>
-            <Link to="/create">Create</Link>
+            <NavLink to="/create">Create</NavLink>
           </li>
         </ul>
 

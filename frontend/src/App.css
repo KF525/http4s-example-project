@@ -50,3 +50,7 @@
   background-color: #cdff05;
   font-weight: bold;
 }
+
+.Navigation li a NavLink .active {
+  color: red;
+}
