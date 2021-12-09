@@ -1,15 +1,18 @@
 package controller
 
 import client.PromptClient
+import error.CompoundPoemFailure.PoemBadResponseFailure
+import model.reponse.PoemResponse
 import model.{Author, Line, Poem}
-import model.reponse.{PoemResponse, PromptResponse}
 import org.mockito.Mockito
 import org.scalatestplus.mockito.MockitoSugar.mock
 import util.BaseSpec
-import zio.{Task, ZIO}
+import org.http4s._
+import zio.ZIO
 import zio.clock.Clock
 import zio.console.Console
-import ziotestsyntax.ZioTestSyntax.{OngoingZioStubbingHelper, ZioTestHelper, consecutively}
+import ziotestsyntax.ZioTestSyntax.{OngoingZioStubbingHelper, ZioTestHelper}
+
 
 class PromptControllerSpec extends BaseSpec {
 
@@ -24,13 +27,28 @@ class PromptControllerSpec extends BaseSpec {
       console <- ZIO.environment[Console]
       client = mock[PromptClient]
       controller = new PromptController(client, clock, console)
-      response: List[PoemResponse] = List(PoemResponse(title, author, List(line), 1))
-      _ = Mockito.when(client.makeRequest).thenSucceed(response)
-      promptResponse = controller.getPrompt.unsafeRun
-    } yield promptResponse
+      poemResponse: List[PoemResponse] = List(PoemResponse(title, author, List(line), 1))
+      _ = Mockito.when(client.makeRequest).thenSucceed(poemResponse)
+      prompt <- controller.getPrompt
+    } yield prompt
 
     val promptResponse = result.unsafeRun
     promptResponse.poem should be(expectedPoem)
     promptResponse.line should be(Line(line))
+  }
+
+  it should "handle errors" in {
+    val expectedFailure = PoemBadResponseFailure("Not ok", Status.InternalServerError)
+
+    val result = for {
+      clock <- ZIO.environment[Clock]
+      console <- ZIO.environment[Console]
+      client = mock[PromptClient]
+      controller = new PromptController(client, clock, console)
+      _ = Mockito.when(client.makeRequest).thenFail(expectedFailure)
+      response <- controller.getPrompt
+    } yield response
+
+    result.runFailure should be(expectedFailure)
   }
 }

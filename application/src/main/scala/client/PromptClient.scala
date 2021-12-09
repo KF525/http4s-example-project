@@ -1,7 +1,7 @@
 package client
 
 import error.CompoundPoemFailure
-import error.CompoundPoemFailure.{PoemBadResponseFailure, PoemTimedOutWithoutResponseFailure}
+import error.CompoundPoemFailure.{NoPoemError, PoemBadResponseFailure, PoemTimedOutWithoutResponseFailure}
 import model.reponse.PoemResponse
 import org.http4s.Status.ClientError
 import org.http4s.circe.jsonOf
@@ -30,12 +30,14 @@ class PromptClient(client: Http4sThinClient,
     val request: ZIO[Clock, CompoundPoemFailure, List[PoemResponse]] =
       client.getRequest(baseUri).timeoutFail(PoemTimedOutWithoutResponseFailure)(timeoutPerAttempt)
 
+    //TODO: match statement, handle list here if possible?
     request.retry(schedule).foldM(err => for {
       _ <-  putStrLn(s"Failed to make request to $baseUri with failure: $err")
       f <- ZIO.fail(err)
-    } yield f, response => ZIO.succeed(response))
+    } yield f, response => if (response.isEmpty) ZIO.fail(NoPoemError) else ZIO.succeed(response))
   }
 
+  //TODO: Do we want to retry NoPoemError
   private def isClientError(poemFailure: CompoundPoemFailure): Boolean = poemFailure match {
     case PoemBadResponseFailure(_, status) if status.responseClass == ClientError => true
     case _ => false

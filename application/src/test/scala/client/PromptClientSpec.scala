@@ -2,7 +2,7 @@ package client
 
 import util.BaseSpec
 import cats.data.NonEmptyList
-import error.CompoundPoemFailure.{PoemBadResponseFailure, PoemTimedOutWithoutResponseFailure}
+import error.CompoundPoemFailure.{NoPoemError, PoemBadResponseFailure, PoemTimedOutWithoutResponseFailure}
 import model.reponse.PoemResponse
 import org.http4s.circe.jsonEncoderOf
 import org.http4s.dsl.Http4sDsl
@@ -35,6 +35,16 @@ class PromptClientSpec extends BaseSpec with Http4sDsl[Task] {
     poemResponse should be(poem.head)
   }
 
+  it should "handle empty responses" in {
+    val baseUri = Uri.unsafeFromString("https://www.poem.com")
+    val mockHttp4sClient = mock[Http4sThinClient]
+
+    when(mockHttp4sClient.getRequest(baseUri)).thenSucceed(List())
+    val client =  new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
+
+    client.makeRequest.runFailure should be(NoPoemError)
+  }
+
   it should "retry non-client errors" in {
     val baseUri = Uri.unsafeFromString("https://www.poem.com")
     val mockHttp4sClient = mock[Http4sThinClient]
@@ -43,7 +53,7 @@ class PromptClientSpec extends BaseSpec with Http4sDsl[Task] {
     val expectedResponses = for {
       refConsecutiveResponses <- Ref.make(NonEmptyList.of(
           ZIO.fail(expectedFailure),
-          ZIO.succeed(List())
+          ZIO.succeed(poem)
       ))
       consecutiveResponses = consecutively(refConsecutiveResponses)
       _ = when(mockHttp4sClient.getRequest(baseUri)).thenReturn(consecutiveResponses)
