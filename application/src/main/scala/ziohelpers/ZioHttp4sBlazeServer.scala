@@ -7,7 +7,6 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import zio._
 import zio.interop.catz.implicits._
 import zio.interop.catz._
-
 import scala.concurrent.ExecutionContext
 
 //trait Http4sServerConfig {
@@ -32,6 +31,6 @@ case class ZioHttp4sBlazeServer(routes: HttpRoutes[Task], config: Http4sServerCo
       Kleisli((a: Request[Task]) => routes.run(a).getOrElse(Response.notFound))
 }
 
-object ZioHttp4sBlazeServer {
-  def layer: URLayer[Has[HttpRoutes[Task]] with Has[Http4sServerConfig], Has[ZioHttp4sBlazeServer]]
- = (ZioHttp4sBlazeServer.apply _).toLayer}
+//object ZioHttp4sBlazeServer {
+//  def layer: URLayer[Has[HttpRoutes[Task]] with Has[Http4sServerConfig], Has[ZioHttp4sBlazeServer]]
+// = (ZioHttp4sBlazeServer.apply _).toLayer}

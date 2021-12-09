@@ -3,18 +3,14 @@ package database
 import cats.effect.{Blocker, Resource}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import config.DatabaseConfig
-import doobie.Transactor
 import doobie.hikari.HikariTransactor
 import doobie.util.ExecutionContexts
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 import zio.blocking.Blocking
-import zio.console.Console
-import zio.{Managed, Task, ZIO}
 import zio.interop.catz._
-import zio.interop.console.cats.putStrLn
+import zio.{Managed, Task, ZIO}
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 
 class Transaction {

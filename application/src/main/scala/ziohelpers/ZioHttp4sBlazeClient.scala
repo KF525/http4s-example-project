@@ -4,7 +4,6 @@ import cats.effect.Resource
 import org.http4s.client.Client
 import org.http4s.client.blaze.BlazeClientBuilder
 import zio.interop.catz._
-
 import scala.concurrent.duration.Duration
 import zio._
 

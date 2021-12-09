@@ -12,11 +12,9 @@ import store.CompoundPoemStore
 import zio.clock.Clock
 import zio.console.Console
 import zio.duration.durationInt
-import zio.interop.console.cats.putStrLn
 import zio.{ExitCode, Managed, Runtime, Task, URIO, ZEnv, ZIO}
 import zio.interop.catz._
 import com.typesafe.scalalogging.StrictLogging
-import ziohelpers.ZioHttp4sBlazeServer
 import ziohelpers.ZioLoggerSyntax._
 
 object Main extends zio.App with StrictLogging {
@@ -37,7 +35,7 @@ object Main extends zio.App with StrictLogging {
         .withRequestTimeout(serviceConfig.requestTimeout)
         .resource.toManagedZIO
       combined = combineResources(transactor, httpClientResource)
-      _ <- putStrLn("Building Service")
+      _ <- logger.infoZ("Building Service")
       _ <- combined.use { case (transactor, client) => buildServer(transactor, client, serviceConfig) }
     } yield ()
 
@@ -61,7 +59,7 @@ object Main extends zio.App with StrictLogging {
       compoundPoemStore = new CompoundPoemStore(transactor)
       compoundPoemController = new CompoundPoemController(compoundPoemStore)
       routes: HttpRoutes[Task] = Routes().routes <+> PromptApi(poemController).routes <+> CompoundPoemApi(compoundPoemController).routes
-      _ <- putStrLn("Starting Blaze Server")
+      _ <- logger.infoZ("Starting Blaze Server")
       _ <- ZioHttp4sBlaze.runBlazeServer(routes, config.servicePort) //ZioHttp4sBlazeServer(routes, Http4sServerConfig(config.servicePort)).runBlazeServer
     } yield ()
   }
