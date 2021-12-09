@@ -11,7 +11,7 @@ case class Poem(title: String, author: Author, lines: List[Line], linecount: Int
 object Poem {
   def createPoem(poemResponse: PoemResponse): Poem = {
     val lines = poemResponse.lines.filter(_.nonEmpty).map(s => Line(s))
-    Poem(poemResponse.title, Author(poemResponse.author), lines, poemResponse.linecount)
+    Poem(poemResponse.title, Author(poemResponse.author), lines, lines.size)
   }
 
   def getRandomLine(poem: Poem): Line = poem.lines.apply(Random.nextInt(poem.lines.size))
