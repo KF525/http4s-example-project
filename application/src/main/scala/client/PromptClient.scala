@@ -24,17 +24,19 @@ class PromptClient(client: Http4sThinClient,
   val schedule: Schedule[Any, CompoundPoemFailure, ((Long, Long), CompoundPoemFailure)] =
     Schedule.spaced(backoffInterval) && Schedule.recurs(retryAttempts) && Schedule.recurUntil[CompoundPoemFailure](isClientError)
 
-  def makeRequest: ZIO[Console with Clock, CompoundPoemFailure, List[PoemResponse]] = {
+  def makeRequest: ZIO[Console with Clock, CompoundPoemFailure, PoemResponse] = {
     implicit val decoder: EntityDecoder[Task, List[PoemResponse]] = jsonOf[Task, List[PoemResponse]]
 
     val request: ZIO[Clock, CompoundPoemFailure, List[PoemResponse]] =
       client.getRequest(baseUri).timeoutFail(PoemTimedOutWithoutResponseFailure)(timeoutPerAttempt)
 
-    //TODO: match statement, handle list here if possible?
     request.retry(schedule).foldM(err => for {
       _ <-  putStrLn(s"Failed to make request to $baseUri with failure: $err")
       f <- ZIO.fail(err)
-    } yield f, response => if (response.isEmpty) ZIO.fail(NoPoemError) else ZIO.succeed(response))
+    } yield f, {
+      case Nil => ZIO.fail(NoPoemError)
+      case h :: _ => ZIO.succeed(h)
+    })
   }
 
   //TODO: Do we want to retry NoPoemError

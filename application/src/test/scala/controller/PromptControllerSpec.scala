@@ -27,7 +27,7 @@ class PromptControllerSpec extends BaseSpec {
       console <- ZIO.environment[Console]
       client = mock[PromptClient]
       controller = new PromptController(client, clock, console)
-      poemResponse: List[PoemResponse] = List(PoemResponse(title, author, List(line), 1))
+      poemResponse: PoemResponse = PoemResponse(title, author, List(line), 1)
       _ = Mockito.when(client.makeRequest).thenSucceed(poemResponse)
       prompt <- controller.getPrompt
     } yield prompt

@@ -31,7 +31,7 @@ class PromptClientSpec extends BaseSpec with Http4sDsl[Task] {
     when(mockHttp4sClient.getRequest(baseUri)).thenSucceed(poem)
     val client =  new PromptClient(mockHttp4sClient, baseUri, 1, 1.second, 1.second)
 
-    val poemResponse: PoemResponse = client.makeRequest.unsafeRun.head
+    val poemResponse: PoemResponse = client.makeRequest.unsafeRun
     poemResponse should be(poem.head)
   }
 

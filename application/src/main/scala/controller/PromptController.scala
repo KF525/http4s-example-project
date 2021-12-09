@@ -10,10 +10,9 @@ import zio.console.Console
 
 class PromptController(client: PromptClient, clock: Clock, console: Console) {
 
-  //TODO: Solution for head?, already took care of empty case
   def getPrompt: ZIO[Any, CompoundPoemFailure, PromptResponse] =
     for {
-      poemResponse <- client.makeRequest.provide(clock ++ console).map(r => r.head)
+      poemResponse <- client.makeRequest.provide(clock ++ console)
       poem = Poem.createPoem(poemResponse)
       line = Poem.getRandomLine(poem)
   } yield PromptResponse(poem, line)
