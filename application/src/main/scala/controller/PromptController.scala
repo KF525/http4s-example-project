@@ -12,7 +12,7 @@ import scala.util.Random
 
 class PromptController(client: PromptClient, clock: Clock, console: Console) {
 
-  //TODO: Looks like I am dropping the error that may come back from makeRequest
+  //TODO: Looks like I am dropping the error that may come back from makeRequest, mapError
   def getPrompt: Task[PromptResponse] = for {
     line <- client.makeRequest.provide(clock ++ console).map(_.headOption).flatMap {
       case Some(p) =>
