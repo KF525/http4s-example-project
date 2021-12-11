@@ -14,7 +14,6 @@ import zio.console.Console
 import zio.duration.Duration
 import zio.interop.catz._
 import zio.{Schedule, Task, ZIO}
-import com.typesafe.scalalogging.StrictLogging
 import ziohelpers.ZioLoggerSyntax._
 
 class PromptClient(client: Http4sThinClient,
