@@ -68,7 +68,7 @@ export class Create extends Component {
           <button className="savePoem" onClick={this.doSaveAndUpdate}>Save Poem</button>
           <button className="newPrompt" onClick={this.getPrompt}>New Prompt</button>
         </div>
-        <div className="source">*From {this.state.firstAuthor}'s <span className="title">Placeholder Title</span></div>
+        <div className="source">*From {this.state.firstAuthor}'s <span className="title">{this.state.promptTitle}</span></div>
       </div>
     }
   }

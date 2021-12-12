@@ -4,7 +4,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   NavLink
 } from "react-router-dom";
 import {Create} from "./Create";
@@ -23,15 +22,10 @@ function App() {
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="About"
-              style={({ isActive }) => ({
-              color: isActive ? '#fff' : '#545e6f',
-              background: isActive ? '#7600dc' : '#f0f0f0',
-              })}>About</NavLink>
+            <NavLink to="/about">About</NavLink>
           </li>
           <li>
-            <NavLink to="/read" style={({isActive}) => ( {color: "red"}) }>Read</NavLink>
+            <NavLink to="/read">Read</NavLink>
           </li>
           <li>
             <NavLink to="/create">Create</NavLink>

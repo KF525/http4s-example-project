@@ -32,7 +32,7 @@ export const fetchLine = async () => {
     return {
       firstLine: result.line.text,
       firstAuthor: result.poem.author.name,
-      promptTitle: result.poem.title //TODO: add title
+      promptTitle: result.poem.title
     }
   } catch (error) {
     return {error: true}
