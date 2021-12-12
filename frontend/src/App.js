@@ -1,40 +1,51 @@
+import Read from "./Read";
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  NavLink
+} from "react-router-dom";
+import {Create} from "./Create";
 import './App.css';
-import {Component} from "react";
-import {CompoundPoem} from "./CompoundPoem";
-import {PoemPrompt} from "./PoemPrompt";
 
-class App extends Component {
+const About = () => <div>About</div>
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      error: null,
-      savedLines: [],
-    };
-  }
+function App() {
+  return (
+    <Router>
+      <div className="Navigation">
+        <ul>
+          <li>
+            <NavLink to="/">
+              <img src="https://play-lh.googleusercontent.com/0_ixZOlXHE0DLR207sHfk-tX-XbkyiBqafbVqenrhlYCBmbDdzSSrsecjtuzJPcDgVl-nYO9kZYLM-o=s400" alt='Compound Poem' />
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="About"
+              style={({ isActive }) => ({
+              color: isActive ? '#fff' : '#545e6f',
+              background: isActive ? '#7600dc' : '#f0f0f0',
+              })}>About</NavLink>
+          </li>
+          <li>
+            <NavLink to="/read" style={({isActive}) => ( {color: "red"}) }>Read</NavLink>
+          </li>
+          <li>
+            <NavLink to="/create">Create</NavLink>
+          </li>
+        </ul>
 
-  addCompoundPoem = (savedPoem) => {
-    this.setState((prevState) => {
-      return {savedLines: [...prevState.savedLines, savedPoem]}
-    })
-  }
-
-  render() {
-    const {error} = this.state;
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    } else {
-      return (
-        <>
-          <div>
-            {this.state.savedLines.map((poem, i) => <CompoundPoem key={i} poem={poem}/>)}
-          </div>
-          <hr/>
-          <PoemPrompt addCompoundPoem={this.addCompoundPoem}/>
-        </>
-      );
-    }
-  }
+        <Routes>
+          <Route path="/about" element={<About/>}/>
+          <Route path="/read" element={<Read/>}/>
+          <Route path="/create" element={<Create/>}/>
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
 export default App;
