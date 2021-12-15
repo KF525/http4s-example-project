@@ -1,6 +1,7 @@
 import cats.implicits.toSemigroupKOps
 import client.{Http4sThinClient, PromptClient}
-import config.{DatabaseConfig, GeneralConfig, Http4sServerConfig}
+import com.typesafe.scalalogging.StrictLogging
+import config.{DatabaseConfig, GeneralConfig}
 import controller.{CompoundPoemController, PromptController}
 import database.Transaction
 import doobie.hikari.HikariTransactor
@@ -14,7 +15,6 @@ import zio.console.Console
 import zio.duration.durationInt
 import zio.{ExitCode, Managed, Runtime, Task, URIO, ZEnv, ZIO}
 import zio.interop.catz._
-import com.typesafe.scalalogging.StrictLogging
 import ziohelpers.ZioLoggerSyntax._
 
 object Main extends zio.App with StrictLogging {
@@ -58,7 +58,8 @@ object Main extends zio.App with StrictLogging {
       poemController = new PromptController(poemClient, clock, console)
       compoundPoemStore = new CompoundPoemStore(transactor)
       compoundPoemController = new CompoundPoemController(compoundPoemStore)
-      routes: HttpRoutes[Task] = Routes().routes <+> PromptApi(poemController).routes <+> CompoundPoemApi(compoundPoemController).routes
+      authWrapper = AuthenticationService.authMiddleware
+      routes: HttpRoutes[Task] = Routes().routes <+> CompoundPoemApi(compoundPoemController).routes <+> authWrapper(PromptApi(poemController).routes)
       _ <- logger.infoZ("Starting Blaze Server")
       _ <- ZioHttp4sBlaze.runBlazeServer(routes, config.servicePort) //ZioHttp4sBlazeServer(routes, Http4sServerConfig(config.servicePort)).runBlazeServer
     } yield ()

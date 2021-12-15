@@ -10,5 +10,6 @@ object CompoundPoemFailure {
   case object NoPoemError extends CompoundPoemFailure
   case class JsonDecodeError(f: DecodeFailure) extends CompoundPoemFailure
   case class PoemGeneralFailure(message: String) extends CompoundPoemFailure
+  case class AuthenticationFailure(message: String) extends CompoundPoemFailure
 }
 
